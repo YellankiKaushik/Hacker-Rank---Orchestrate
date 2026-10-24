@@ -1,5 +1,42 @@
 # HackerRank Orchestrate - October 2026
 
+## GhostTrace Guard implementation checkpoint
+
+**Current state: working evidence pipeline, not submission-ready.** The reviewed run processes all 518 inputs but accepts 420 decisions and withholds 98 unresolved cases. No final 518-row root `output.csv` is produced. See `code/docs/UNRESOLVED_ISSUES.md` for every withheld case and `code/evaluation/evaluation_report.md` for measured sample failures. Do not submit `artifacts/resolved_predictions.partial.csv` as the final output.
+
+The implementation uses dated identity aliases, participant-source indexing, restricted in-memory SQLite, temporal/replica reconciliation, CSV-driven policy, deterministic compilation, and GhostGuard raw-source rechecks. PDF text extraction and local screenshot OCR are active. No language model runtime calls, API costs, or LLM review gains are claimed.
+
+### Actual setup and commands
+
+Tested with Python 3.12.14 and pypdf 6.10.0. On Windows, screenshot extraction requires Windows PowerShell and the Windows English OCR language pack. On other systems the adapter requires `tesseract` with English data; that platform path has not been verified here.
+
+```powershell
+# With a working Python 3.12 installation on PATH:
+python -m pip install -r code/requirements.txt
+python -m unittest discover -s code/tests -v
+python code/evaluation/generate_reports.py
+python code/main.py
+python code/validate_output.py
+```
+
+`code/main.py` deliberately exits nonzero while any case remains unresolved and preserves any previous output. The final validator cannot pass until all 518 rows are supported. `code/diagnostics.py` instead saves accepted rows to the explicitly partial artifact and records unresolved diagnostics. Report generation runs tests, both sample variants, the reviewed full attempt, and creates the issue register and usage report. `code/package_submission.py` creates and checks a development source ZIP; this does not waive the prediction gate.
+
+The WindowsApps `python.exe` alias was unusable on this workstation. The commands actually tested used the bundled interpreter:
+
+```powershell
+$pythonPath = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+& $pythonPath -X utf8 -m unittest discover -s code/tests -v
+& $pythonPath -X utf8 code/evaluation/generate_reports.py
+& $pythonPath -X utf8 code/main.py
+& $pythonPath -X utf8 code/package_submission.py
+```
+
+The app sandbox may require access approval for Windows OCR. Its cache in `tmp/ocr/` is keyed by the image SHA-256 and is excluded from Git and packaging. A source extraction without that cache was successfully exercised locally. No credentials are needed for the current runtime. Keep `dataset/` unchanged next to the extracted `code/`, or supply `--dataset PATH` to the main CLI. Input/output defaults resolve against the repository rather than the shell working directory.
+
+Private `log.txt` and the original Codex rollout remain separate submission evidence. They are excluded from Git and `code.zip`; package session traces only after the session ends and the app closes, following the unchanged official trace instructions. No HackerRank upload has occurred.
+
+The original official starter instructions follow.
+
 ## Ghost Data Still Exists
 
 Build an AI agent that audits whether a user's personal data was actually deleted.
