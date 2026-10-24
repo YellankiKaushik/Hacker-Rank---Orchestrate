@@ -11,6 +11,7 @@ from .loader import contained_path
 from .adapters import EvidenceIndex,restricted_sql,COLLECTIONS,DEFAULT_CATEGORY
 from .validator import validate_audit
 from .relationships import RelationshipIndex
+from .intent import deletion_intent,AmbiguousIntent
 
 
 class ReviewError(ValueError):
@@ -20,7 +21,7 @@ class ReviewError(ValueError):
 def rejection_category(message):
     if 'changed during' in message: return 'SOURCE_INTEGRITY'
     if 'identity binding' in message or 'resource ownership' in message: return 'IDENTITY_CONFLICT'
-    if 'no subject-linked profile' in message: return 'MISSING_PROFILE_LINK_OR_PROOF'
+    if 'no subject-linked profile' in message or 'required deletion coverage' in message: return 'MISSING_PROFILE_LINK_OR_PROOF'
     if 'Missing linked resource' in message: return 'RETRIEVAL_OMISSION'
     if 'Missing bound resource' in message or 'no admissible' in message or 'Unresolved state' in message: return 'MISSING_EVIDENCE'
     if 'Unsupported source' in message: return 'UNSUPPORTED_SOURCE_OR_STATE'
@@ -92,14 +93,21 @@ class GhostGuard:
                 fresh.media={fact.source:raw}
                 fresh.link_documents(self.corpus)
             self.reparsed[fact.source]=fresh.facts
+        critical=('retention_until','retained_until','legal_hold_active','shared_subjects')
         return any((f.system,f.resource,f.category,f.state,f.observed,f.scope)==
                    (fact.system,fact.resource,fact.category,fact.state,fact.observed,fact.scope)
+                   and tokens(fact.data)<=tokens(f.data)
+                   and all(fact.data.get(k)==f.data.get(k) for k in critical)
                    for f in self.reparsed[fact.source])
 
     def review(self,audit,policy,aliases):
         validate_audit(audit,self.corpus.sources)
         self.reviewed+=1
-        if audit.status=='NOT_APPLICABLE': return []
+        try: intent=deletion_intent(audit.case['request_text'])
+        except AmbiguousIntent: intent=None
+        if audit.status=='NOT_APPLICABLE':
+            return [] if intent is False else ['Unsupported non-deletion verdict: authorization is not independently established']
+        if intent is False: return ['Contradicted deletion verdict: request does not authorize deletion']
         cutoff=timestamp(audit.case['audit_at'])
         issues=[]
         fact_map={(f.system,f.resource):f for f in audit.facts}
@@ -109,10 +117,9 @@ class GhostGuard:
                     issues.append(f'Invalid identity binding: {key[0]}/{key[1]}')
                 if key not in fact_map:
                     issues.append(f'Missing bound resource state: {key[0]}/{key[1]}')
-        if audit.status=='COMPLETE' and not any(
-            (f.category=='USER_PROFILE' and f.state=='ABSENT') or
-            (f.category=='ACCOUNT_TOMBSTONE' and f.state=='REDACTED') for f in audit.facts):
-            issues.append('Unsupported COMPLETE: no subject-linked profile absence or compliant tombstone proof')
+        assessment=self.assess_obligations(audit,policy,aliases)
+        audit.coverage_proofs=[assessment]
+        issues.extend(assessment['blocking_issues'])
         for fact in audit.facts:
             if not fact.admissible(cutoff) or not self.source_supports(fact):
                 issues.append(f'Unsupported source: {fact.system}/{fact.resource}/{fact.source}')
@@ -152,5 +159,52 @@ class GhostGuard:
                 if (fact.system,fact.resource) not in fact_map:
                     issues.append(f'Missing linked resource: {fact.system}/{fact.resource}')
         self.challenges+=len(set(issues))
+        if any(v.startswith(('Unsupported source:','Invalid identity binding:','Uninvestigated step resource:')) for v in issues):
+            assessment['classification']='E'
+        elif any(v.startswith(('Contradicted','Unsupported policy','Unsafe deletion','Conflicting')) for v in issues):
+            assessment['classification']='D'
+        elif issues: assessment['classification']='C'
+        assessment['blocking_issues']=sorted(set(issues))
         if issues: self.challenged_cases.add(audit.case['case_id'])
         return sorted(set(issues))
+
+    def assess_obligations(self,audit,policy,aliases):
+        """The contract quantifies relevant records, not a mandatory profile step.
+
+        A retained journal alone is neutral to deletion. Known linked obligations
+        must have a readback; anonymous roots in the same admitted source remain
+        a scope ambiguity and cannot be assigned by elimination. A substantive
+        compliant secondary treatment can prove its obligation without inventing
+        an unrelated profile. Only A/B are accepted; C/D/E remain blocking.
+        """
+        cutoff=timestamp(audit.case['audit_at'])
+        keys={(f.system,f.resource) for f in audit.facts}
+        required=self.relationships.bind(audit.subject,aliases,cutoff)
+        missing=sorted(set(required)-keys)
+        issues=[f'Missing bound resource state: {s}/{r}' for s,r in missing]
+        kind='C' if missing else 'A'
+        note='All independently bound, admissible record obligations have source-backed states.'
+        if audit.status=='COMPLETE':
+            if any(policy.violation(f,cutoff) for f in audit.facts):
+                kind='D'; issues.append('Contradicted COMPLETE: a required treatment is violated')
+            roots=[f for f in audit.facts if f.category in ('USER_PROFILE','ACCOUNT_TOMBSTONE')]
+            if not roots:
+                sources={f.source for f in audit.facts}
+                from .relationships import declared_subjects
+                unknown_roots=[f for f in self.index.facts if f.source in sources and f.admissible(cutoff)
+                    and f.category in ('USER_PROFILE','ACCOUNT_TOMBSTONE') and (f.system,f.resource) not in keys
+                    and not declared_subjects(f,self.relationships.known_subjects)]
+                treatment=any(policy.action(f,cutoff)!='RETAIN' and not policy.violation(f,cutoff)
+                              and f.state!='UNKNOWN' for f in audit.facts)
+                if unknown_roots or not treatment:
+                    kind='C'
+                    issues.append('Unsupported COMPLETE: required deletion coverage is unproven; '+
+                                  ('unbound account readbacks in admitted source' if unknown_roots else 'retention alone does not prove deletion'))
+                    note='Cannot establish every relevant copy; no anonymous resource was assigned to this subject.'
+                elif not issues:
+                    kind='B'
+                    note=('No independent admissible binding establishes a profile obligation. '
+                          'The contract requires treatment of relevant records, not an extra universal profile step; '
+                          'the known secondary treatment and every bound obligation are verified.')
+        return {'classification':kind,'blocking_issues':sorted(set(issues)),
+                'missing_bound_resources':[list(k) for k in missing],'reason':note}

@@ -1,4 +1,4 @@
-"""Build a development source ZIP and verify its clean extraction without uploading."""
+"""Build source ZIP and execute strict and candidate modes after clean extraction."""
 from pathlib import Path,PurePosixPath
 import hashlib
 import json
@@ -64,10 +64,22 @@ def main():
             raise ValueError('Unexpected clean full-run behavior; inspect release gate')
         if not unresolved and (full.returncode!=0 or not (directory/'output.csv').exists()):
             raise ValueError('Clean full-run prediction gate failed')
+        candidate=subprocess.run([sys.executable,'-X','utf8','code/main.py','--mode','candidate','--dataset',str(ROOT/'dataset'),
+            '--cache-dir',str(ROOT/'tmp/ocr'),'--output',str(directory/'output.csv')],cwd=directory,capture_output=True,text=True,timeout=60)
+        if candidate.returncode: raise ValueError('Clean candidate generation failed: '+candidate.stderr[-1000:])
+        candidate_hash=hashlib.sha256((directory/'output.csv').read_bytes()).hexdigest()
+        if candidate_hash!=current['output_sha256']: raise ValueError('Clean candidate differs from measured output')
+        check=subprocess.run([sys.executable,'-X','utf8','code/validate_candidate.py','--dataset',str(ROOT/'dataset'),
+            '--cache-dir',str(ROOT/'tmp/ocr'),'--output',str(directory/'output.csv'),
+            '--report',str(directory/'candidate_validation.json')],cwd=directory,capture_output=True,text=True,timeout=60)
+        if check.returncode: raise ValueError('Extracted candidate source checks failed: '+check.stderr[-1000:])
+        verified=json.loads((directory/'candidate_validation.json').read_text())
         result={'package':'code.zip','bytes':output.stat().st_size,
             'sha256':hashlib.sha256(output.read_bytes()).hexdigest(),'members':len(names),
             'extracted_tests_passed':True,'extracted_sample':observed,
             'extracted_full_run_expected_block':expected_block,'submission_ready':not bool(unresolved),
+            'candidate_rows':verified['rows'],'candidate_sha256':candidate_hash,'candidate_source_checks':'PASS',
+            'candidate_semantic_certainty':verified['SEMANTIC_CERTAINTY'],
             'validation_context':'source-only extraction, installed Python/pypdf, external unchanged dataset, warm OCR cache'}
     artifacts=ROOT/'artifacts'; artifacts.mkdir(exist_ok=True)
     (artifacts/'package_verification.json').write_text(json.dumps(result,indent=2),encoding='utf-8')

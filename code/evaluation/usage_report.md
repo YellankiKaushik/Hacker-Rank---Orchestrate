@@ -1,14 +1,16 @@
-# Runtime usage and cost checkpoint
+# Final full-candidate runtime usage
 
-Generated 2026-10-24T17:01:38.841587+00:00, tied to the full 518-case attempt that produced the 420-row **partial** artifact, SHA-256 `042163b15224a55db16d7141bb43bc068b1c62ee557b479badf99cc07021dadd`. There is no completed full-dataset final output yet.
+Generated 2026-10-24T18:55:03.992821+00:00. Run generated all 518 of 518 predictions; output SHA-256 `edc5a4ea5e0ea8376a6236524fb9eb1049657767c61cb72883fc5fef787ff7f3`. Strict accepted 427, uncertain 91. Warm-cache runtime 10.9115 seconds.
 
-| Provider / model | Calls | Input tokens | Output tokens | Total tokens | Estimated USD |
+| Final runtime provider/model | Calls | Input tokens | Output tokens | Total tokens | Estimated API USD |
 |---|---:|---:|---:|---:|---:|
 | No language model invoked | 0 | 0 | 0 | 0 | 0.00 |
-| Overall runtime API totals | 0 | 0 | 0 | 0 | 0.00 |
+| Overall final 518-case run | 0 | 0 | 0 | 0 | 0.00 |
 
-Runtime: 4.5857 seconds. Average tokens per input request: 0/518 = 0. Average estimated API cost per input request: $0/518 = $0. No provider price assumption is needed for zero calls. This counts inference/review API usage only; it excludes the Codex engineering session, whose token consumption and cost have not been obtained as per-request telemetry and must not be assumed zero.
+Average tokens per request: 0/518 = 0. Average API cost per request: $0/518 = $0. These figures exclude Codex engineering-session usage/cost, which is unmeasured here. Windows.Media.Ocr is local screenshot extraction, exposes no model ID/token usage, and uses a source-hashed cache. pypdf 6.10.0 extracts PDF text. No cloud model/rate is invented.
 
-PDF parsing uses pypdf 6.10.0. Windows.Media.Ocr performs local screenshot recognition (English language pack), with no network API, reported token counts or billed API model. Its internal OCR model identifier is not exposed by the Windows API. The final attempt used a warm source-SHA-256 OCR cache; cold OCR was separately exercised for all 11 screenshots. The optional intent adapter is implemented and transport-tested with mocks but is inactive in this full run. A real model-list availability request returned HTTP 401. No actual inference model identity, calls or token usage exists for that rejected availability check; model quality is NOT VERIFIED. Mock model IDs/tokens are test fixtures and are excluded here. Model/pricing configuration must be explicit; no model or rate is guessed.
+## Separate live local development experiment
 
-The report must be regenerated with `python code/evaluation/generate_reports.py` after unresolved cases are fixed and a valid 518-row output exists. These truthful zeros do not prove the hackathon's desired AI-powered investigation capability is complete.
+Ollama loopback, installed model `gemma4:e4b`: 9 actual calls, 1305 input + 181 output = 1486 tokens. Per-model totals equal these experimental overall totals. Includes initial four formatting failures, one diagnostic and final four-fixture check (4/4 including abstention versus 3/4 baseline). Actual server usage is measured; mock tokens excluded. Zero API fee; hardware/electricity cost NOT VERIFIED. These experimental tokens are not final 518-case inference.
+
+Optional AI is bounded to deterministic intent abstentions. Strict two-field schema, exact input quotes, cache invalidation by provider/model/schema/prompt/input, call/output/timeout limits, and fallback remain enforced. It cannot generate IDs, policy or steps. Cloud access remains unverified after the historical HTTP 401 and was not retried. The deterministic full run does not claim an LLM investigation or an AI dataset accuracy gain.

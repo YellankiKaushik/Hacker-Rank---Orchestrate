@@ -28,7 +28,7 @@ class Engine:
         self.source_cache_hits=0
         self.source_reads=0
 
-    def investigate(self,case):
+    def investigate(self,case,permit_partial=False):
         try:
             intent=deletion_intent(case['request_text'])
         except AmbiguousIntent:
@@ -93,11 +93,17 @@ class Engine:
                 issues.append(f'Unresolved state: {key[0]}/{key[1]}')
                 continue
             selected.append(fact)
-        if any(issue.startswith('Unresolved state:') for issue in issues):
+        if not permit_partial and any(issue.startswith('Unresolved state:') for issue in issues):
             raise UnresolvedCase(f'{case["case_id"]}: '+ '; '.join(issues))
-        if not selected:
+        if not selected and not permit_partial:
             raise UnresolvedCase(f'{case["case_id"]}: no admissible subject-linked state evidence')
+        if not selected:
+            issues.append('No admissible subject-linked state evidence; no current-state claim can be emitted')
         status,steps = compile_steps(selected,self.policy,cutoff)
+        if permit_partial and (not selected or any(v.startswith(('Unresolved state:','Linked resource has no admissible state:')) for v in issues)):
+            status='INCOMPLETE'
+            for step in steps:
+                if step['phase']!='FINDING': step['evidence_id']=''
         return Audit(case,subject,selected,status,steps,issues,bindings=bindings)
 
     def reinvestigate(self,case,audit,max_sources=4):

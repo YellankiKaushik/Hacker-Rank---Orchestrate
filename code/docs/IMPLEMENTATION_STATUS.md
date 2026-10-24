@@ -1,12 +1,16 @@
 # GhostTrace Guard checkpoint and interview notes
 
-## Accuracy-recovery continuation
+## Current final-candidate continuation
 
-The implementation now has 91 passing test methods, explicit dated resource-reference links, controlled source rereads and caches, conservative replica-state handling, activity state checks, semantic artifact validation and a bounded optional intent adapter. Exact public cases improved from 8/32 to 9/32. Primary/reviewed status accuracy remains 29/32 and 24/32. No cases from the original 98-case blocker set were defensibly recovered; the accepted partial artifact still has 420 rows. See RECOVERY_AUDIT.md and the regenerated evaluation/usage reports.
+The implementation has 116 passing test methods and separate strict/candidate modes. The COMPLETE gate enumerates actual relevant obligations instead of demanding one universal profile/tombstone observation. A/B accept; C/D/E block. Seven previous blockers now qualify B; strict audit accepts 427/518 and withholds 91. The candidate produces all 518 rows with 91 explicitly unproven status inferences, no fabricated references and 1,031 source-supported cited steps. Classification **B: structurally valid with documented semantic uncertainty**; overall fully proven submission readiness remains FAIL.
 
-P1–P4 investigation and repairs are implemented and evaluated. P5's provider protocol/budgets/fallback are implemented and tested with mocked transport, while live model quality is NOT VERIFIED because model discovery returned HTTP 401. P6 shows a measured one-case exact improvement, not competitive correctness. P7 remains FAIL for the final 518-row output. P8's archive/extraction/reproducibility gates are executed by `code/release_check.py`; actual PASS/FAIL/NOT VERIFIED results are written to `artifacts/READINESS.md`. Raw traces remain separate until the session ends. No model can supply missing provenance.
+Public primary/strict/candidate statuses are 29/32, 24/32 and 29/32; exact cases remain 9/32. No substantial exact gain is claimed. Repeated missing account/analytics/security steps have no admissible selector or appear only in later captures. The explicit attachment-catalog association remains despite a public-reference omission. case_55 remains unknown and has an uncertainty-only INCOMPLETE empty plan; shape passes, strict semantic plan completeness fails. The unchanged strict validator rejects the candidate. Source/operation PASS gates concern emitted claims, not unobserved obligations.
 
-The older G0–G5 table below describes the initial checkpoint. Current measured evidence takes precedence over its historical test counts and unimplemented-AI wording.
+Optional AI now supports the existing cloud protocol and fixed-loopback Ollama transport. Already-installed gemma4:e4b scored 4/4 small authored intent fixtures including abstention versus deterministic 3/4 after a JSON instruction repair. Nine total experimental calls measured 1,305 input/181 output tokens with no API fee; hardware/electricity cost unmeasured. The previous rejected cloud credentials were not retried. Final 518-case runtime needs zero model calls. This is an intent benchmark, not an LLM investigation or dataset gain.
+
+`code/release_check.py` verifies two fresh processes, raw source semantics, strict partial coverage and clean archive execution, then writes separate PASS/FAIL/NOT VERIFIED gates to artifacts/READINESS.md. Full output shape is supported; semantic certainty is not. Final trace ZIP awaits session end/app closure under the official instructions. No HackerRank upload occurs.
+
+The material below is historical, including its G0–G5 table, old blocker totals and unimplemented-AI wording. Current measured evidence above and in the regenerated reports takes precedence.
 
 The official problem statement, AGENTS.md and immutable participant sources override the proposed root DOCS design pack. This is an implemented modular local Python CLI, not a finished submission or a cloud system.
 

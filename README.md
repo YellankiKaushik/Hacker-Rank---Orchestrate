@@ -1,48 +1,74 @@
 # HackerRank Orchestrate - October 2026
 
-## GhostTrace Guard implementation checkpoint
+## GhostTrace Guard candidate
 
-**Current state: working evidence pipeline, not submission-ready.** The reviewed run processes all 518 inputs but accepts 420 decisions and withholds 98 unresolved cases. No final 518-row root `output.csv` is produced. See `code/docs/UNRESOLVED_ISSUES.md` for every withheld case and `code/evaluation/evaluation_report.md` for measured sample failures. Do not submit `artifacts/resolved_predictions.partial.csv` as the final output.
+**B: structurally valid with documented semantic uncertainty.** The candidate produces all 518 rows. Strict audit accepts 427 and withholds 91; seven previous blockers now pass the contract-based obligation check. All 1,031 cited steps pass source/time/provenance checks. Semantic certainty remains FAIL, including case_55's uncertainty-only empty plan. Do not interpret row coverage as proof that deletion is complete.
 
-The implementation uses dated identity aliases, participant-source indexing, restricted in-memory SQLite, temporal/replica reconciliation, CSV-driven policy, deterministic compilation, and GhostGuard raw-source rechecks. PDF text extraction and local screenshot OCR are active. No language model runtime calls, API costs, or LLM review gains are claimed.
+Public sample: primary 29/32 statuses; strict GhostGuard 24/32; every-row candidate 29/32. All variants have 9/32 exact cases. Exact accuracy has not substantially improved. There are 116 passing test methods. Reports include every sample case and all remaining limitations.
 
-The continuation adds explicit resource-reference provenance, a real bounded source reread, stricter replica/retention and citation checks, multilingual negation handling, and an optional intent-only Responses adapter. The measured suite now has 91 passing test methods. Public exact cases improved from 8/32 to 9/32; status accuracy remains 29/32 primary and 24/32 reviewed. The same 98 full-dataset cases remain withheld. See `code/docs/RECOVERY_AUDIT.md` for source-specific reasons and `artifacts/READINESS.md` after release checks.
+### Setup and execution
 
-### Actual setup and commands
+Python 3.12+ and `pip install -r code/requirements.txt` provide the parser dependency (pypdf). Windows screenshot extraction uses Windows.Media.Ocr with an English language pack and PowerShell; the source-hash cache is excluded from Git and ZIP. A fresh isolated dependency install is NOT VERIFIED. The installed runtime and cold OCR have been exercised. On another OS supply a compatible OCR adapter rather than assuming Windows OCR is available.
 
-Tested with Python 3.12.14 and pypdf 6.10.0. On Windows, screenshot extraction requires Windows PowerShell and the Windows English OCR language pack. On other systems the adapter requires `tesseract` with English data; that platform path has not been verified here.
+From the repository root:
 
-```powershell
-# With a working Python 3.12 installation on PATH:
-python -m pip install -r code/requirements.txt
+```text
 python -m unittest discover -s code/tests -v
-python code/evaluation/generate_reports.py
-python code/main.py
+python code/main.py --mode strict
+python code/main.py --mode candidate
+python code/validate_candidate.py
 python code/validate_output.py
+python code/evaluation/generate_reports.py
+python code/release_check.py
 ```
 
-`code/main.py` deliberately exits nonzero while any case remains unresolved and preserves any previous output. The final validator cannot pass until all 518 rows are supported. `code/diagnostics.py` instead saves accepted rows to the explicitly partial artifact and records unresolved diagnostics. Report generation runs tests, both sample variants, the reviewed full attempt, and creates the issue register and usage report. `code/package_submission.py` creates and checks a development source ZIP; this does not waive the prediction gate.
+Strict mode intentionally exits with unresolved cases and preserves the previous root output. Candidate mode validates shape before atomic replacement of root output.csv, and writes artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. `validate_candidate.py` separately checks every emitted source/operation and reports semantic certainty. The unchanged strict `validate_output.py` rejects the unproven candidate; its failure is expected and is never reported as a PASS. The release checker runs source validation, two fresh processes, and clean ZIP extraction/execution. It writes artifacts/READINESS.md with separate gates and does not upload anything.
 
-The WindowsApps `python.exe` alias was unusable on this workstation. The commands actually tested used the bundled interpreter:
+The WindowsApps Python alias on this workstation is unusable. Tested commands use:
 
 ```powershell
-$pythonPath = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-& $pythonPath -X utf8 -m unittest discover -s code/tests -v
-& $pythonPath -X utf8 code/evaluation/generate_reports.py
-& $pythonPath -X utf8 code/main.py
-& $pythonPath -X utf8 code/package_submission.py
-& $pythonPath -X utf8 code/release_check.py
+$py = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+& $py -X utf8 -m unittest discover -s code/tests -v
+& $py -X utf8 code/main.py --mode candidate
+& $py -X utf8 code/validate_candidate.py
+& $py -X utf8 code/evaluation/generate_reports.py
+& $py -X utf8 code/release_check.py
 ```
 
-The app sandbox may require access approval for Windows OCR. Its cache in `tmp/ocr/` is keyed by the image SHA-256 and is excluded from Git and packaging. A source extraction without that cache was successfully exercised locally. No credentials are needed for the current runtime. Keep `dataset/` unchanged next to the extracted `code/`, or supply `--dataset PATH` to the main CLI. Input/output defaults resolve against the repository rather than the shell working directory.
+Provide unchanged `dataset/` beside the extracted source. `--dataset PATH`, `--cache-dir PATH`, `--output PATH`, `--metrics-path PATH`, and `--uncertainty-report PATH` support isolated runs. Sample answers are read only by evaluators after inference. `code/evaluation/baseline.md` records this implementation's historical abstentions for report comparisons; it is never an inference input.
 
-### Optional AI intent path
+### Decision modes and review
 
-`python code/main.py --ai` tries a model only when the deterministic intent classifier abstains. It cannot generate resource IDs, evidence IDs, policies or output steps. Environment configuration requires `OPENAI_API_KEY`, an explicit `GHOSTTRACE_AI_MODEL`, and positive `GHOSTTRACE_AI_INPUT_USD_PER_M` / `GHOSTTRACE_AI_OUTPUT_USD_PER_M` rates verified for that model. No model or price is chosen silently. Defaults bound calls to 8, estimated reserved cost to $0.05, output to 256 tokens, timeout to 10 seconds and transient retries to one; concurrency is one. Bounds can be reduced with `GHOSTTRACE_AI_MAX_CALLS`, `GHOSTTRACE_AI_MAX_COST_USD`, `GHOSTTRACE_AI_MAX_OUTPUT_TOKENS`, `GHOSTTRACE_AI_TIMEOUT_SECONDS` and `GHOSTTRACE_AI_RETRIES`.
+Strict audit rejects C required-proof gaps, D contradictions and E unsupported sources. A supported and B supported-but-nonessential missing observations can pass. The official contract applies policy to relevant records; it does not require a profile/tombstone step in every case. A retained journal alone cannot prove deletion; unobserved linked obligations or unidentified account rows in a subject-linked source still block COMPLETE. GhostGuard rereads source bytes and policy-critical fields and checks identity provenance, cutoffs, missing operations and intent. Shared domain parsers limit independence.
 
-The adapter uses a strict two-field schema and rejects quotes absent from the request. Authentication failure disables further attempts. Cache keys include input, model, schema and prompt version; cache content stays under ignored `tmp/ai/`. Missing provider usage is marked incomplete, not silently measured as zero. The live availability check returned HTTP 401: no usable model or live quality was verified and no inference request was made. Mock transport tests do not establish model accuracy. The deterministic 518-case attempt uses zero model calls. Protocol reference: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+Candidate policy is explicitly limited: established violations predict INCOMPLETE; an unknown required state predicts INCOMPLETE without inventing a specific violation; otherwise observed compliant treatments predict COMPLETE under an unverified closed-evidence assumption. All 91 unsupported full-proof status inferences are recorded separately. No resource/evidence ID, restore-risk claim or missing step is fabricated. Case_55 contains no admissible allowed/blocked restoration fact, so it has no source-supported step to emit. Its shape-valid INCOMPLETE empty array does not satisfy strict semantic plan requirements.
 
-Private `log.txt` and the original Codex rollout remain separate submission evidence. They are excluded from Git and `code.zip`; package session traces only after the session ends and the app closes, following the unchanged official trace instructions. No HackerRank upload has occurred.
+### Optional local/cloud intent AI
+
+AI runs only on deterministic intent abstentions and cannot generate IDs, policies or steps. Use `--ai` with explicit configuration. An already installed local model was tested on four authored intent fixtures: `gemma4:e4b` scored 4/4 including abstention versus deterministic 3/4. Initial formatting failures were rejected; explicit JSON-only instructions fixed them. The nine total experimental calls used 1,305 input and 181 output tokens. Zero API fee; local compute costs unmeasured. This small experiment does not show dataset-level gain. Final 518-case runtime uses zero model calls/tokens and $0 estimated API cost.
+
+For an already running Ollama server on loopback:
+
+```powershell
+$env:GHOSTTRACE_AI_PROVIDER = 'ollama'
+$env:GHOSTTRACE_AI_MODEL = 'gemma4:e4b' # Must match your installed model; no download is performed.
+& $py -X utf8 code/main.py --mode candidate --ai
+```
+
+Transport is fixed to http://127.0.0.1:11434/api/chat and never sends cloud authorization headers. Exact quote grounding, strict two-field schema, cache versioning, eight-call/256-output-token/10-second default bounds and one transient retry remain enforced. Set GHOSTTRACE_AI_MAX_CALLS, GHOSTTRACE_AI_MAX_OUTPUT_TOKENS, GHOSTTRACE_AI_TIMEOUT_SECONDS and GHOSTTRACE_AI_RETRIES to reduce bounds. Local API price is zero; electricity/hardware is not estimated.
+
+Cloud OpenAI transport requires OPENAI_API_KEY, GHOSTTRACE_AI_PROVIDER=openai, an explicit GHOSTTRACE_AI_MODEL and verified positive GHOSTTRACE_AI_INPUT_USD_PER_M / GHOSTTRACE_AI_OUTPUT_USD_PER_M prices. The estimated reservation budget defaults to $0.05 (GHOSTTRACE_AI_MAX_COST_USD). The prior HTTP 401 was not retried. No working cloud model is claimed. Read secrets only from the environment; never commit credentials, caches or private traces.
+
+### Artifacts and limits
+
+- output.csv: all 518 best-effort predictions, atomic shape validation passed.
+- artifacts/SUBMISSION_UNCERTAINTY_REPORT.md: every uncertain prediction and omitted obligation.
+- artifacts/READINESS.md and candidate_validation.json: executed independent gates.
+- code/evaluation/evaluation_report.md and usage_report.md: required measured reports.
+- code.zip: source-only package with clean extraction/execution checks; no datasets, caches, credentials, logs or nested archives.
+- log.txt: private append-only transcript, separate from Git and the code ZIP.
+
+Original session traces remain preserved. Follow agent_trace_instructions.md: finish sessions and close the app before copying relevant traces, redact staged copies, then archive separately. Final trace ZIP is NOT VERIFIED while this session is active. No HackerRank upload has occurred.
 
 The original official starter instructions follow.
 
