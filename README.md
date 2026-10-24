@@ -6,6 +6,8 @@
 
 The implementation uses dated identity aliases, participant-source indexing, restricted in-memory SQLite, temporal/replica reconciliation, CSV-driven policy, deterministic compilation, and GhostGuard raw-source rechecks. PDF text extraction and local screenshot OCR are active. No language model runtime calls, API costs, or LLM review gains are claimed.
 
+The continuation adds explicit resource-reference provenance, a real bounded source reread, stricter replica/retention and citation checks, multilingual negation handling, and an optional intent-only Responses adapter. The measured suite now has 91 passing test methods. Public exact cases improved from 8/32 to 9/32; status accuracy remains 29/32 primary and 24/32 reviewed. The same 98 full-dataset cases remain withheld. See `code/docs/RECOVERY_AUDIT.md` for source-specific reasons and `artifacts/READINESS.md` after release checks.
+
 ### Actual setup and commands
 
 Tested with Python 3.12.14 and pypdf 6.10.0. On Windows, screenshot extraction requires Windows PowerShell and the Windows English OCR language pack. On other systems the adapter requires `tesseract` with English data; that platform path has not been verified here.
@@ -29,9 +31,16 @@ $pythonPath = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-ru
 & $pythonPath -X utf8 code/evaluation/generate_reports.py
 & $pythonPath -X utf8 code/main.py
 & $pythonPath -X utf8 code/package_submission.py
+& $pythonPath -X utf8 code/release_check.py
 ```
 
 The app sandbox may require access approval for Windows OCR. Its cache in `tmp/ocr/` is keyed by the image SHA-256 and is excluded from Git and packaging. A source extraction without that cache was successfully exercised locally. No credentials are needed for the current runtime. Keep `dataset/` unchanged next to the extracted `code/`, or supply `--dataset PATH` to the main CLI. Input/output defaults resolve against the repository rather than the shell working directory.
+
+### Optional AI intent path
+
+`python code/main.py --ai` tries a model only when the deterministic intent classifier abstains. It cannot generate resource IDs, evidence IDs, policies or output steps. Environment configuration requires `OPENAI_API_KEY`, an explicit `GHOSTTRACE_AI_MODEL`, and positive `GHOSTTRACE_AI_INPUT_USD_PER_M` / `GHOSTTRACE_AI_OUTPUT_USD_PER_M` rates verified for that model. No model or price is chosen silently. Defaults bound calls to 8, estimated reserved cost to $0.05, output to 256 tokens, timeout to 10 seconds and transient retries to one; concurrency is one. Bounds can be reduced with `GHOSTTRACE_AI_MAX_CALLS`, `GHOSTTRACE_AI_MAX_COST_USD`, `GHOSTTRACE_AI_MAX_OUTPUT_TOKENS`, `GHOSTTRACE_AI_TIMEOUT_SECONDS` and `GHOSTTRACE_AI_RETRIES`.
+
+The adapter uses a strict two-field schema and rejects quotes absent from the request. Authentication failure disables further attempts. Cache keys include input, model, schema and prompt version; cache content stays under ignored `tmp/ai/`. Missing provider usage is marked incomplete, not silently measured as zero. The live availability check returned HTTP 401: no usable model or live quality was verified and no inference request was made. Mock transport tests do not establish model accuracy. The deterministic 518-case attempt uses zero model calls. Protocol reference: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 Private `log.txt` and the original Codex rollout remain separate submission evidence. They are excluded from Git and `code.zip`; package session traces only after the session ends and the app closes, following the unchanged official trace instructions. No HackerRank upload has occurred.
 

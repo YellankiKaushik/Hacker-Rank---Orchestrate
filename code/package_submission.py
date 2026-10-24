@@ -35,6 +35,8 @@ def main():
     temp_root=ROOT/'tmp'; temp_root.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='package-check-',dir=temp_root) as directory:
         directory=Path(directory)
+        if not directory.resolve().is_relative_to(temp_root.resolve()):
+            raise ValueError('Package extraction escaped the intended temporary workspace')
         with zipfile.ZipFile(output) as archive: archive.extractall(directory)
         tests=subprocess.run([sys.executable,'-X','utf8','-m','unittest','discover','-s','code/tests','-q'],cwd=directory,capture_output=True,text=True)
         if tests.returncode: raise RuntimeError('Extracted test suite failed: '+tests.stderr[-2000:])

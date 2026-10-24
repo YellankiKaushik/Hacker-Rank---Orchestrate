@@ -1,5 +1,13 @@
 # GhostTrace Guard checkpoint and interview notes
 
+## Accuracy-recovery continuation
+
+The implementation now has 91 passing test methods, explicit dated resource-reference links, controlled source rereads and caches, conservative replica-state handling, activity state checks, semantic artifact validation and a bounded optional intent adapter. Exact public cases improved from 8/32 to 9/32. Primary/reviewed status accuracy remains 29/32 and 24/32. No cases from the original 98-case blocker set were defensibly recovered; the accepted partial artifact still has 420 rows. See RECOVERY_AUDIT.md and the regenerated evaluation/usage reports.
+
+P1–P4 investigation and repairs are implemented and evaluated. P5's provider protocol/budgets/fallback are implemented and tested with mocked transport, while live model quality is NOT VERIFIED because model discovery returned HTTP 401. P6 shows a measured one-case exact improvement, not competitive correctness. P7 remains FAIL for the final 518-row output. P8's archive/extraction/reproducibility gates are executed by `code/release_check.py`; actual PASS/FAIL/NOT VERIFIED results are written to `artifacts/READINESS.md`. Raw traces remain separate until the session ends. No model can supply missing provenance.
+
+The older G0–G5 table below describes the initial checkpoint. Current measured evidence takes precedence over its historical test counts and unimplemented-AI wording.
+
 The official problem statement, AGENTS.md and immutable participant sources override the proposed root DOCS design pack. This is an implemented modular local Python CLI, not a finished submission or a cloud system.
 
 Upstream was fetched again during this build. Commit `0eddbbd` only corrects the challenge URL in AGENTS.md from `wwww` to `www`; the dataset and output contract are unchanged. It was inspected, not merged. The fork's main remains untouched.

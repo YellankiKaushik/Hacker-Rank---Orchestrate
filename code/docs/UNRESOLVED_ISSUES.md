@@ -1,6 +1,6 @@
 # Unresolved issues — GhostTrace Guard
 
-Updated 2026-10-24T15:58:12.183564+00:00. No clarification questions are required for ordinary execution. This is a checkpoint issue register, not a claim that the official dataset is defective. “Missing” below means the current engine could not establish the relationship/proof from admitted evidence; further parser or retrieval work may recover it.
+Updated 2026-10-24T17:01:38.841587+00:00. No clarification questions are required for ordinary execution. This is a checkpoint issue register, not a claim that the official dataset is defective. “Missing” below means the current engine could not establish the relationship/proof from admitted evidence; further parser or retrieval work may recover it.
 
 ## Verified case_55 evidence and missing fact
 
@@ -11,6 +11,8 @@ Updated 2026-10-24T15:58:12.183564+00:00. No clarification questions are require
 - Missing: an admissible access-policy/configuration/readback observation proving whether this archive was restorable or blocked at the cutoff. Archive existence, neighboring restore history and generic restore success rates are insufficient.
 - Impact: no defensible COMPLETE or INCOMPLETE restore verdict can be compiled for this case under the current schema. No UNKNOWN row or fabricated finding is exported.
 - Next action: exhaust remaining scoped source relations and source timestamps; if no admissible fact exists, retain this blocker for the next checkpoint. No extra evidence has been verified.
+
+The continuation independently inspected the actual screenshot again and searched all 27 manifest sources whose capture times precede this cutoff, plus admissible CSV activity/history. It distinguishes stored archive existence, catalog association, technical restore capability, and permission at cutoff. Only the first two are established. No direct restore-access configuration or admissible allowed/blocked observation was found; future material remains excluded.
 
 ## Per-case release blockers
 
@@ -129,12 +131,12 @@ For every row below, all manifest-listed sources were ingested, but only observa
 
 | Issue | Evidence / verified state | Impact | Recommended next action |
 |---|---|---|---|
-| Public sample reference differences | See every measured failure in evaluation_report.md | Exact-case accuracy is only 8/32 | Improve general bindings and scoped readbacks; do not hardcode sample IDs |
+| Public sample reference differences | See every measured failure in evaluation_report.md | Exact-case accuracy is 9/32 | Improve general bindings and scoped readbacks; do not hardcode sample IDs |
 | Media/catalog identity inconsistency | Some catalog-linked screenshots display contact fields differing from current identity snapshots; the marketing console is one example | Catalog links prove an association claim, not that every displayed contact value belongs to that subject | Recheck visual field scope and dated identity provenance; surface contradictions rather than merge people |
 | Discovery coverage | 97 primary COMPLETE drafts lacked profile/tombstone proof; reviewer blocked them | A syntactically valid draft is not a complete deletion audit | Maintain the proof gate and improve source graph |
 | Raw-source reviewer independence | Reviewer reopens and reparses source, but uses shared deterministic adapters | Not independent model reasoning or independent parser validation | Add adversarial fixtures and a separately implemented semantic review where useful |
-| Optional language model | No inference API calls or adapter used | Substantive runtime LLM investigation is unimplemented | Add only a bounded, measured task that can improve grounded results; no model can create missing proof |
-| SQL inventory scope | Absence is synthesized only within a subject-linked source and declared table scope | Completeness depends on interpreting inventory scope correctly | Add explicit source-scoped query bindings; never use lack of retrieval as absence |
+| Optional language model | Bounded intent adapter and mock contract tests implemented; actual model discovery returned HTTP 401 | Live model quality and model availability are NOT VERIFIED; full-run model calls remain zero | Validate a usable environment credential/model and explicit prices before a controlled live test; do not use AI to create missing proof |
+| SQL inventory scope | A global unrelated-inventory query experiment wrongly cleared a known profile and was reverted; regression test added | Inventory batches cannot be treated as a global customer census | Use subject-linked captures, or a real explicit reference and dedicated physical-table primary-key scope |
 | Source docs | Only the three root DOCS files exist; referenced companion pack files were not present | Missing design companions, not a runtime data blocker | Continue from official contract and available design; don't claim absent files were read |
 | Upstream documentation change | Fetched upstream/main at 0eddbbd; only the AGENTS.md challenge URL typo changes, with no dataset/contract changes | Update is inspected but not merged; local main is preserved | Reconcile the documentation update separately without automatic merging |
 | Python alias | WindowsApps python.exe alias failed; bundled Python 3.12.14 works | Bare python command currently needs a proper Python install/PATH | Use documented bundled command or install Python; no global configuration was changed |
