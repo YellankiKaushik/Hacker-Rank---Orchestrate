@@ -1,5 +1,6 @@
 """Current two-mode measurements. Golden sample data is evaluation-only."""
 from datetime import datetime,timezone
+from collections import Counter
 import hashlib
 import json
 import re
@@ -11,6 +12,7 @@ from evaluation.main import compare
 from ghosttrace.loader import read_csv
 from ghosttrace.gaps import GapAuditor
 from validate_candidate import validate
+from evaluation.mismatch_audit import audit as mismatch_audit
 
 
 def ratio(a,b): return f'{a}/{b} ({100*a/b:.2f}%)' if b else 'N/A (zero denominator)'
@@ -41,11 +43,16 @@ def main():
     recovered=sorted(old-remaining)
     auditor=GapAuditor(corpus,index)
     gaps={a.case['case_id']:auditor.inspect(a.case) for a in audits if a.case['case_id'] in old}
+    mismatch=mismatch_audit(ROOT,corpus,index,c)
     diagnostic={d['case_id']:d for d in full['case_diagnostics']}
+    remaining_groups=Counter('UNKNOWN_REQUIRED_RESOURCE_STATE' if 'Unresolved state:' in diagnostic[k].get('final_error','')
+                            else gaps[k]['reason'] for k in remaining)
     local_path=ROOT/'artifacts/local_ai_evaluation.json'
     local=json.loads(local_path.read_text()) if local_path.exists() else None
     experiments=([local]+local.get('previous_runs',[])) if local else []
     local_totals={f:sum(v['usage'][f] for v in experiments) for f in ('attempts','input_tokens','output_tokens','estimated_cost_usd')}
+    review_path=ROOT/'artifacts/source_review_ai_evaluation.json'
+    review_ai=json.loads(review_path.read_text()) if review_path.exists() else None
     report=f'''# Measured two-mode evaluation
 
 Generated {now}. **B: structurally valid candidate with documented semantic uncertainty.** There is no hidden-answer score. Full candidate coverage is {len(audits)}/518; strict evidence-proven coverage under the implemented finite-source review is {full['strict_resolved']}/518. This is not exhaustive knowledge of every possible copy.
@@ -56,6 +63,7 @@ Generated {now}. **B: structurally valid candidate with documented semantic unce
 |---|---|---|---|
 | Previous primary, 2ada359 | 29/32 | 9/32 | 3 withheld |
 | Previous strict review, 2ada359 | 24/32 | 9/32 | 8 withheld |
+| Previous complete candidate, d98e485 | 29/32 | 9/32 | 8 uncertain |
 | Current primary | {p['status_correct']}/32 | {p['exact_cases']}/32 | {len(pm['unresolved'])} withheld |
 | Current strict review | {s['status_correct']}/32 | {s['exact_cases']}/32 | {len(sm['unresolved'])} withheld |
 | Current every-row candidate | {c['status_correct']}/32 | {c['exact_cases']}/32 | {len(cm['uncertain_cases'])} uncertain, none withheld |
@@ -125,6 +133,9 @@ Missing account/anonymous analytics verifications lack admitted subject selector
 '''
     if local:
         report+=f"\n## Actual bounded local AI\n\nInstalled model `{local['requested_model']}`: initial four replies failed strict JSON checks; one diagnostic identified formatting failure. An explicit JSON-only instruction repaired it. Final authored fixture score {local['model_correct']}/4 including one abstention versus deterministic {local['baseline_correct']}/4. This tiny intent benchmark does not demonstrate dataset gain. All experimental calls including rejected replies: {local_totals['attempts']}, input tokens {local_totals['input_tokens']}, output tokens {local_totals['output_tokens']}. No API fee; local compute cost unmeasured. Rejected cloud credentials were not retried. Final dataset runtime uses zero model calls.\n"
+    report+=f"\n## Final engineering root-cause audit\n\nAll {mismatch['case_mismatches']} mismatches were classified against original source contents and exact cutoffs. Missing operations: `{mismatch['taxonomy']}`. Causes: `{mismatch['causes']}`. Bound admissible facts omitted by inference: {mismatch['repairable_engine_omissions']}. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No additional source relationship was recovered since d98e485, and output accuracy did not change. The remaining uncertainty groups are `{dict(remaining_groups)}`; future-only sources are diagnostic only, never inference inputs.\n\nPrevious d98e485 candidate precision 114/164 (69.51%), recall 114/193 (59.07%), missing resources 34, extra 3. Current precision {ratio(c['step_matches'],c['predicted_steps'])}, recall {ratio(c['step_matches'],c['reference_steps'])}, missing {c['missing_records']}, extra {c['extra_records']}. No improvement is claimed.\n"
+    if review_ai:
+        report+=f"\n## New source-grounded AI review experiment\n\nTwo bounded batches evaluated six authored source claims: deletion-success versus readback, conflicting replica, archive existence versus permission, blocked permission, and compliant tombstone. Deterministic baseline: {review_ai['baseline_correct']}/6. Accepted model batches: {sum(a['accepted'] for a in review_ai['attempts'])}/2; both replies were rejected with ValueError at the configured 768-output-token bound, so no model accuracy score is asserted. Uncached response reproducibility: {review_ai['uncached_response_reproducible']}. Durations: {[round(a['seconds'],3) for a in review_ai['attempts']]} seconds versus {review_ai['baseline_seconds']:.6f} seconds deterministic. Usage: {review_ai['calls']} actual calls, {review_ai['input_tokens']} input/{review_ai['output_tokens']} output tokens. Fine-grained rejection subcause was not retained in that measured run; future runs now record it. No improvement was demonstrated, so this capability is evaluation-only and disabled for final predictions. No rejected verdict became an output fact.\n"
     (reports/'evaluation_report.md').write_text(report,encoding='utf-8')
     usage=f'''# Final full-candidate runtime usage
 
@@ -144,6 +155,8 @@ Average tokens per request: 0/518 = 0. Average API cost per request: $0/518 = $0
         usage+=f"Ollama loopback, installed model `{local['requested_model']}`: {local_totals['attempts']} actual calls, {local_totals['input_tokens']} input + {local_totals['output_tokens']} output = {local_totals['input_tokens']+local_totals['output_tokens']} tokens. Per-model totals equal these experimental overall totals. Includes initial four formatting failures, one diagnostic and final four-fixture check ({local['model_correct']}/4 including abstention versus {local['baseline_correct']}/4 baseline). Actual server usage is measured; mock tokens excluded. Zero API fee; hardware/electricity cost NOT VERIFIED. These experimental tokens are not final 518-case inference.\n\n"
     usage+='''Optional AI is bounded to deterministic intent abstentions. Strict two-field schema, exact input quotes, cache invalidation by provider/model/schema/prompt/input, call/output/timeout limits, and fallback remain enforced. It cannot generate IDs, policy or steps. Cloud access remains unverified after the historical HTTP 401 and was not retried. The deterministic full run does not claim an LLM investigation or an AI dataset accuracy gain.
 '''
+    if review_ai:
+        usage+=f"\nAdditional source-review experiment on gemma4:e4b: {review_ai['calls']} calls, {review_ai['input_tokens']} input + {review_ai['output_tokens']} output tokens, zero API fee. Both bounded batches failed validation and were excluded from inference. Combined observed development experiments: {local_totals['attempts']+review_ai['calls']} calls, {local_totals['input_tokens']+review_ai['input_tokens']} input + {local_totals['output_tokens']+review_ai['output_tokens']} output tokens. These are separate from the final run's zeros. Local hardware/electricity and Codex engineering cost remain unmeasured.\n"
     (reports/'usage_report.md').write_text(usage,encoding='utf-8')
     recovery=f'''# Contract and recovery audit
 
@@ -167,6 +180,7 @@ Cutoff 2026-04-30T11:00:00Z. evidence_32 backup_restore_console_20260429.png pro
 
 Anonymous 404s/anonymized rows establish state for a resource without identifying its subject. A retained journal in the same batch cannot assign that row to a person. Future-only sources are diagnostic explanations only; no future binding selects a candidate status/resource/citation/operation. Every remaining inferred prediction is listed separately in SUBMISSION_UNCERTAINTY_REPORT.md.
 '''
+    recovery+=f"\n## d98e485 continuation\n\nNew relationships recovered: 0. Remaining group census: `{dict(remaining_groups)}`. Raw admitted source/OCR mentions and all missing reference keys were checked in evaluator-only analysis; no bound admitted fact was omitted by the engine. Explicit identity-bearing non-catalog activity matches for the samples: {len(mismatch['explicit_non_catalog_activity_links'])}. More exact matches would require selectors or cutoff-admissible state observations that have not been verified. No repeat blind scan or guessed association is used.\n"
     (docs/'RECOVERY_AUDIT.md').write_text(recovery,encoding='utf-8')
     issues=f'''# Unresolved evidence and execution issues
 
@@ -187,7 +201,9 @@ Updated {now}. Strict unresolved {len(full['unresolved'])}; candidate 518 rows; 
 - Unsupported COMPLETE predictions assume no additional untreated copy; unknown-required-state INCOMPLETE does not assert an active violation. Every assumption is counted separately. Emitted citation/operation PASS checks do not establish global semantic certainty.
 - Missing sample account/analytics/security operations lack admissible bindings or exist only in excluded later captures. Evidence-supported attachment/account/tombstone extras remain even when omitted from public references. More linkage cannot be obtained by copying golden IDs.
 - Installed local AI works on four bounded authored intent fixtures; final runtime needs zero calls. Initial malformed replies were rejected, then fixed by explicit JSON instructions. Tiny fixture success does not establish full-dataset gain. The rejected cloud credential was not retried.
-- Fresh isolated dependency installation is NOT VERIFIED; existing runtime imports/tests pass. Final raw trace export waits until session ends and app closes as required by the official instructions. Originals remain preserved. No HackerRank upload occurred.
+- A fresh isolated virtualenv installed pinned pypdf from official PyPI after a workspace TEMP workaround for sandbox ACL. verify_environment.py checks dependency origin/user-site isolation; the release checker records actual clean execution. Final raw trace export waits until session ends and app closes as required by official instructions. Originals remain preserved. No HackerRank upload occurred.
+- Output privacy review passes. Contest-specific public-publication terms remain NOT VERIFIED: the registration page requires login, and Windows browser automation stopped because it could not verify the URL. The conditional public output commit is withheld; its hash is recorded in the sanitized GitHub release record. General content ownership does not establish event-specific permission.
+- New source-review AI batches failed bounded validation and were not used. No accuracy benefit or complete reproducibility is claimed for that optional experiment.
 '''
     (docs/'UNRESOLVED_ISSUES.md').write_text(issues,encoding='utf-8')
     save(ROOT/'tmp/sample_metrics.json',{'primary':p,'strict':s,'candidate':c,'run':cm})

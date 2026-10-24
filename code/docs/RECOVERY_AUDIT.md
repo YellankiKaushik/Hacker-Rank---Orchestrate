@@ -1,6 +1,6 @@
 # Contract and recovery audit
 
-Generated 2026-10-24T18:55:03.992821+00:00. Blanket profile proof replaced by relevant obligations; A/B accept, C/D/E block. Previous 97-case cluster re-evaluated: 7 accepted B, 90 unresolved C. case_55 separately remains unknown. Strict coverage 427/518; candidate 518/518 with 91 unproven predictions.
+Generated 2026-10-24T19:27:22.010787+00:00. Blanket profile proof replaced by relevant obligations; A/B accept, C/D/E block. Previous 97-case cluster re-evaluated: 7 accepted B, 90 unresolved C. case_55 separately remains unknown. Strict coverage 427/518; candidate 518/518 with 91 unproven predictions.
 
 The contract quantifies relevant records without prescribing one universal category. B requires substantive compliant treatment, all dated bound obligations covered and no anonymous root observation in the subject-linked source. Retention alone does not establish deletion. No IDs were assigned by timing, position or suffix.
 
@@ -112,3 +112,7 @@ Cutoff 2026-04-30T11:00:00Z. evidence_32 backup_restore_console_20260429.png pro
 ## Binding limits
 
 Anonymous 404s/anonymized rows establish state for a resource without identifying its subject. A retained journal in the same batch cannot assign that row to a person. Future-only sources are diagnostic explanations only; no future binding selects a candidate status/resource/citation/operation. Every remaining inferred prediction is listed separately in SUBMISSION_UNCERTAINTY_REPORT.md.
+
+## d98e485 continuation
+
+New relationships recovered: 0. Remaining group census: `{'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'UNKNOWN_REQUIRED_RESOURCE_STATE': 1}`. Raw admitted source/OCR mentions and all missing reference keys were checked in evaluator-only analysis; no bound admitted fact was omitted by the engine. Explicit identity-bearing non-catalog activity matches for the samples: 0. More exact matches would require selectors or cutoff-admissible state observations that have not been verified. No repeat blind scan or guessed association is used.

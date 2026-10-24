@@ -13,6 +13,7 @@ import zipfile
 from ghosttrace.loader import Corpus,read_csv
 from ghosttrace.semantic_validation import validate_semantic_file
 from validate_candidate import validate
+from publication_check import inspect_output
 
 ROOT=Path(__file__).resolve().parents[1]
 def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -33,15 +34,26 @@ def main():
     result={'run_id':str(uuid.uuid4()),'timestamp_utc':datetime.now(timezone.utc).isoformat(),'gates':{}}
     gates=result['gates']; cache=ROOT/'tmp/ocr'
     result['dependencies']={'python':sys.version.split()[0],'pypdf':importlib.metadata.version('pypdf')}
-    result['fresh_isolated_dependency_install']='NOT VERIFIED'
+    if sys.prefix!=sys.base_prefix:
+        from verify_environment import verify
+        result['clean_environment']=verify()
+        result['fresh_isolated_dependency_install']=result['clean_environment']['gate']
+    else:
+        result['fresh_isolated_dependency_install']='NOT VERIFIED'
+    gates['CLEAN_DEPENDENCY_INSTALL']=result['fresh_isolated_dependency_install']
     test=command([sys.executable,'-X','utf8','-m','unittest','discover','-s','code/tests','-q'])
     result['tests']=int(re.search(r'Ran (\d+) tests',test.stdout+test.stderr)[1]); result['test_failures']=0
     gates['CODE_TESTS']='PASS'
     sample=json.loads((ROOT/'tmp/sample_metrics.json').read_text())
-    gates['SAMPLE_STATUS_ACCURACY']='PASS' if sample['candidate']['status_correct']>=29 else 'FAIL'
-    gates['SAMPLE_EXACT_CASE_ACCURACY']='PASS' if sample['candidate']['exact_cases']>=9 else 'FAIL'
-    result['sample_gate_meaning']='Measured all-32 candidate sample, no regression versus prior primary 29/32 and exact 9/32; not a hidden-accuracy threshold.'
+    gates['SAMPLE_STATUS_NO_REGRESSION']='PASS' if sample['candidate']['status_correct']>=29 else 'FAIL'
+    gates['SAMPLE_EXACT_NO_REGRESSION']='PASS' if sample['candidate']['exact_cases']>=9 else 'FAIL'
+    result['measured_quality']={k:sample['candidate'][k] for k in ('cases','status_correct','exact_cases','status_accuracy','exact_case_rate',
+        'step_precision','step_recall','missing_records','extra_records','false_complete','false_incomplete')}
+    gates['HIDDEN_OR_COMPETITIVE_QUALITY']='NOT VERIFIED'
+    result['sample_gate_meaning']='No regression compares d98e485 sample 29/32 statuses and 9/32 exact. Quality is reported numerically; no competitive-quality threshold or hidden score is established.'
     corpus=Corpus(ROOT/'dataset'); cases=read_csv(ROOT/'dataset/deletion_requests.csv')
+    result['output_publication']=inspect_output(ROOT/'output.csv',corpus,cases)
+    gates['OUTPUT_CONTENT_PRIVACY']=result['output_publication']['privacy_gate']
     checks=validate(ROOT/'output.csv',cases,corpus,cache)
     (ROOT/'artifacts/candidate_validation.json').write_text(json.dumps(checks,indent=2),encoding='utf-8')
     for k in ('CSV_SCHEMA_VALIDITY','CITATION_INTEGRITY','TEMPORAL_VALIDITY','POLICY_VALIDITY','SOURCE_PROVENANCE','SEMANTIC_CERTAINTY'):
@@ -57,6 +69,7 @@ def main():
     result['partial_semantically_validated_rows']=validate_semantic_file(partial,subset,corpus,cache)
     strict=subprocess.run([sys.executable,'-X','utf8','code/validate_output.py'],cwd=ROOT,capture_output=True,text=True,timeout=60)
     result['strict_validator_accepts_candidate']=strict.returncode==0
+    gates['OFFICIAL_CONTRACT_VALIDITY']='PASS' if strict.returncode==0 else 'FAIL'
     if checks['uncertain_cases'] and strict.returncode==0: raise ValueError('Strict validator unexpectedly waived semantic gaps')
     temp=ROOT/'tmp'/('release-'+result['run_id']); temp.mkdir(parents=True)
     runs=[]
@@ -79,7 +92,14 @@ def main():
     command([sys.executable,'-X','utf8','code/package_submission.py'],timeout=180)
     result['package']=json.loads((ROOT/'artifacts/package_verification.json').read_text())
     findings=secret_scan(ROOT/'code.zip'); result['secret_scan_paths_only']=findings
-    gates['CODE_ZIP']='PASS' if not findings and result['package']['candidate_rows']==518 else 'FAIL'
+    gates['CODE_ZIP']='PASS' if not findings and result['package']['candidate_rows']==518 and result['package']['deterministic_archive_rebuild']=='PASS' else 'FAIL'
+    result['quality_assessments']={
+        'A_tests':gates['CODE_TESTS'],
+        'B_no_regression': 'PASS' if all(gates[k]=='PASS' for k in ('SAMPLE_STATUS_NO_REGRESSION','SAMPLE_EXACT_NO_REGRESSION')) else 'FAIL',
+        'C_measured_prediction_quality':result['measured_quality'],
+        'D_official_contract_validity':gates['OFFICIAL_CONTRACT_VALIDITY'],
+        'E_evidence_proven_completeness':gates['SEMANTIC_CERTAINTY'],
+        'F_artifact_packaging_readiness':gates['CODE_ZIP']}
     transcript=(ROOT/'log.txt').read_text(encoding='utf-8')
     entries=transcript.split('## [')[1:]
     gates['CHAT_TRANSCRIPT']='PASS' if entries and all(len(re.findall(r'^tool=.+$',e,re.M))==1 and len(re.findall(r'^model=.+$',e,re.M))==1 for e in entries) else 'FAIL'
@@ -92,7 +112,8 @@ def main():
         'Source/policy PASS gates certify emitted claims and known operations, not missing obligations or hidden correctness.',
         'case_55 has an uncertainty-only INCOMPLETE empty plan; source shape passes, strict semantic plan requirements fail.',
         'All-32 candidate sample accuracy is 29/32 statuses and 9/32 exact; no substantial exact-case improvement.',
-        'Fresh isolated dependency installation was not tested; bundled runtime imports/extracted execution pass.',
+        'Fresh isolated installation and execution are verified only when CLEAN_DEPENDENCY_INSTALL is PASS; read measured environment evidence.',
+        'Conditional public CSV publication remains unverified; a passing privacy check does not verify event-specific sharing terms.',
         'The active session must end and app close before copying, redacting and zipping the original relevant traces.',
         'Basic archive secret scanning is not a complete privacy audit. No dataset, transcript or private trace is packaged.',
         'No HackerRank upload or interview was performed.']
@@ -101,7 +122,7 @@ def main():
     report=f"# Candidate readiness — executed gates\n\nRun {result['run_id']} at {result['timestamp_utc']}. **{result['candidate_classification']}**. Overall fully proven submission readiness: {gates['OVERALL_SUBMISSION_READINESS']}.\n\n| Gate | Result |\n|---|---|\n"
     report+=''.join(f'| {k} | {v} |\n' for k,v in gates.items())
     report+=f"\nTests {result['tests']}, failures 0. Candidate rows {checks['rows']}; strict {checks['strict_accepted']}; uncertain {len(checks['uncertain_cases'])}; source-backed cited steps {checks['source_backed_cited_steps']}.\n\nOutput SHA-256 `{checks['sha256']}`. Code ZIP SHA-256 `{result['package']['sha256']}`.\n\n"
-    report+=result['sample_gate_meaning']+'\n\n'+f"Fresh processes: `{runs}`.\n\n"
+    report+=result['sample_gate_meaning']+'\n\n'+f"Numerical quality: `{result['measured_quality']}`.\n\nSix separate assessments: `{result['quality_assessments']}`.\n\nFresh processes: `{runs}`.\n\n"
     report+='\n'.join('- '+v for v in result['limitations'])+'\n'
     (artifacts/'READINESS.md').write_text(report,encoding='utf-8')
     print(json.dumps({k:v for k,v in result.items() if k not in ('package','limitations')},indent=2))

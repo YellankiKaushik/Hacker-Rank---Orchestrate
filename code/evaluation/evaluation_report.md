@@ -1,6 +1,6 @@
 # Measured two-mode evaluation
 
-Generated 2026-10-24T18:55:03.992821+00:00. **B: structurally valid candidate with documented semantic uncertainty.** There is no hidden-answer score. Full candidate coverage is 518/518; strict evidence-proven coverage under the implemented finite-source review is 427/518. This is not exhaustive knowledge of every possible copy.
+Generated 2026-10-24T19:27:22.010787+00:00. **B: structurally valid candidate with documented semantic uncertainty.** There is no hidden-answer score. Full candidate coverage is 518/518; strict evidence-proven coverage under the implemented finite-source review is 427/518. This is not exhaustive knowledge of every possible copy.
 
 ## Public sample: all 32 cases
 
@@ -8,6 +8,7 @@ Generated 2026-10-24T18:55:03.992821+00:00. **B: structurally valid candidate wi
 |---|---|---|---|
 | Previous primary, 2ada359 | 29/32 | 9/32 | 3 withheld |
 | Previous strict review, 2ada359 | 24/32 | 9/32 | 8 withheld |
+| Previous complete candidate, d98e485 | 29/32 | 9/32 | 8 uncertain |
 | Current primary | 29/32 | 9/32 | 3 withheld |
 | Current strict review | 24/32 | 9/32 | 8 withheld |
 | Current every-row candidate | 29/32 | 9/32 | 8 uncertain, none withheld |
@@ -44,14 +45,14 @@ GhostGuard does not improve measured sample status accuracy: 29/32 primary versu
 - Uncertain predictions: 91; unsupported full-proof status inferences: 91; fabricated references: 0.
 - Source-backed cited steps: 1031/1031. Future work uses empty evidence IDs.
 - Structure, emitted citation/time/provenance/policy-operation gates PASS. Semantic certainty FAIL.
-- Output SHA-256 `edc5a4ea5e0ea8376a6236524fb9eb1049657767c61cb72883fc5fef787ff7f3`; warm-cache seconds 10.9115.
+- Output SHA-256 `edc5a4ea5e0ea8376a6236524fb9eb1049657767c61cb72883fc5fef787ff7f3`; warm-cache seconds 7.6276.
 - Targeted rereads 33, source-view cache hits 58; at most one retry/four source files per challenged case.
 
 Unknown required state predicts INCOMPLETE without inventing a particular violation. Observed compliant states with unproven scope predict COMPLETE under an explicitly unverified closed-evidence assumption. Every such inference appears in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. case_55 has no source-supported current-state check: INCOMPLETE with an empty array satisfies CSV/JSON shape but fails strict semantic plan completeness. The existing strict validator remains unchanged and rejects the unproven candidate.
 
 ## Regression coverage and additional participant cases
 
-116 unit/synthetic integration test methods pass. Representative independently authored cases:
+118 unit/synthetic integration test methods pass. Representative independently authored cases:
 
 1. Compliant secondary treatment passes B without an unrelated profile; retention-only proof stays C.
 2. An unobserved linked profile or unidentified account readback stays C; no batch-order assignment is used.
@@ -96,3 +97,13 @@ Missing account/anonymous analytics verifications lack admitted subject selector
 ## Actual bounded local AI
 
 Installed model `gemma4:e4b`: initial four replies failed strict JSON checks; one diagnostic identified formatting failure. An explicit JSON-only instruction repaired it. Final authored fixture score 4/4 including one abstention versus deterministic 3/4. This tiny intent benchmark does not demonstrate dataset gain. All experimental calls including rejected replies: 9, input tokens 1305, output tokens 181. No API fee; local compute cost unmeasured. Rejected cloud credentials were not retried. Final dataset runtime uses zero model calls.
+
+## Final engineering root-cause audit
+
+All 23 mismatches were classified against original source contents and exact cutoffs. Missing operations: `{'1_ACCOUNT_ABSENCE': 20, '3_ANALYTICS_ANONYMIZATION': 7, '5_EXTRA_RESOURCE': 3, '2_RETAINED_VERIFICATION': 7}`. Causes: `{'NO_STATE_OBSERVATION': 16, 'MISSING_SUBJECT_SELECTOR': 12, 'EXPLICIT_ADMITTED_RELATIONSHIP_DIFFERS_FROM_REFERENCE': 3, 'ONLY_POST_CUTOFF_OBSERVATIONS': 6}`. Bound admissible facts omitted by inference: 0. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No additional source relationship was recovered since d98e485, and output accuracy did not change. The remaining uncertainty groups are `{'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'UNKNOWN_REQUIRED_RESOURCE_STATE': 1}`; future-only sources are diagnostic only, never inference inputs.
+
+Previous d98e485 candidate precision 114/164 (69.51%), recall 114/193 (59.07%), missing resources 34, extra 3. Current precision 114/164 (69.51%), recall 114/193 (59.07%), missing 34, extra 3. No improvement is claimed.
+
+## New source-grounded AI review experiment
+
+Two bounded batches evaluated six authored source claims: deletion-success versus readback, conflicting replica, archive existence versus permission, blocked permission, and compliant tombstone. Deterministic baseline: 6/6. Accepted model batches: 0/2; both replies were rejected with ValueError at the configured 768-output-token bound, so no model accuracy score is asserted. Uncached response reproducibility: False. Durations: [23.22, 16.75] seconds versus 0.000558 seconds deterministic. Usage: 2 actual calls, 1240 input/1536 output tokens. Fine-grained rejection subcause was not retained in that measured run; future runs now record it. No improvement was demonstrated, so this capability is evaluation-only and disabled for final predictions. No rejected verdict became an output fact.

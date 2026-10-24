@@ -10,16 +10,34 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 
 
+def build_archive(output,members,root):
+    """Stable byte order, metadata and text newlines across clean Git checkouts."""
+    with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
+        for path in sorted(members,key=lambda p:p.relative_to(root).as_posix()):
+            name=path.relative_to(root).as_posix()
+            info=zipfile.ZipInfo(name,date_time=(1980,1,1,0,0,0))
+            info.create_system=3; info.external_attr=0o100644<<16
+            info.compress_type=zipfile.ZIP_DEFLATED
+            archive.writestr(info,path.read_bytes().replace(b'\r\n',b'\n'),compresslevel=9)
+
+
 def main():
+    (ROOT/'tmp').mkdir(exist_ok=True)
     output=ROOT/'code.zip'
     code=ROOT/'code'
     members=[ROOT/'README.md']+[p for p in code.rglob('*') if p.is_file()
         and p.suffix in ('.py','.md','.txt','.ps1')
+        and p.name!='FINAL_RELEASE_RECORD.md'
         and not any(part in ('__pycache__','.venv','venv','node_modules') for part in p.parts)]
     required={'README.md','code/main.py','code/requirements.txt','code/ghosttrace/ocr.ps1',
               'code/evaluation/evaluation_report.md','code/evaluation/usage_report.md','code/docs/UNRESOLVED_ISSUES.md'}
-    with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED) as archive:
-        for path in sorted(members): archive.write(path,path.relative_to(ROOT).as_posix())
+    build_archive(output,members,ROOT)
+    first_hash=hashlib.sha256(output.read_bytes()).hexdigest()
+    # Hash-bearing release record is excluded to avoid recursive archive hashes.
+    with tempfile.TemporaryDirectory(prefix='zip-rebuild-',dir=ROOT/'tmp') as rebuild:
+        second=Path(rebuild)/'code.zip'; build_archive(second,members,ROOT)
+        if hashlib.sha256(second.read_bytes()).hexdigest()!=first_hash:
+            raise ValueError('Source archive bytes are not reproducible')
     with zipfile.ZipFile(output) as archive:
         names=set(archive.namelist())
         if not required<=names: raise ValueError('Package missing required source/report files')
@@ -80,6 +98,8 @@ def main():
             'extracted_full_run_expected_block':expected_block,'submission_ready':not bool(unresolved),
             'candidate_rows':verified['rows'],'candidate_sha256':candidate_hash,'candidate_source_checks':'PASS',
             'candidate_semantic_certainty':verified['SEMANTIC_CERTAINTY'],
+            'deterministic_archive_rebuild':'PASS',
+            'archive_metadata':'Sorted members, fixed 1980 ZIP epoch, normalized LF text, fixed regular-file permissions; FINAL_RELEASE_RECORD.md excluded to avoid self-referential hash.',
             'validation_context':'source-only extraction, installed Python/pypdf, external unchanged dataset, warm OCR cache'}
     artifacts=ROOT/'artifacts'; artifacts.mkdir(exist_ok=True)
     (artifacts/'package_verification.json').write_text(json.dumps(result,indent=2),encoding='utf-8')

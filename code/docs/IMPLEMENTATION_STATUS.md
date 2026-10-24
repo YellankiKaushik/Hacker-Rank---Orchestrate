@@ -1,3 +1,17 @@
+# GhostTrace Guard 0.4.0 — engineering completion record
+
+The current candidate remains class B: structurally valid with documented semantic uncertainty. It has 518 rows, 427 strict accepted decisions and 91 unproven predictions. Public candidate status accuracy is 29/32, exact accuracy 9/32, step precision 114/164 (69.51%), recall 114/193 (59.07%), missing/extra resources 34/3. These values are unchanged since d98e485; no new identity relationship was recovered. Strict reviewed sample status remains 24/32. Every emitted cited step remains source-supported, but semantic completeness and official contract validity fail.
+
+This continuation audited every sample mismatch against parsed and raw admitted source text/OCR and exact cutoffs. The common gaps are anonymous account/analytics readbacks without selectors, missing observations and later-only captures. There is no verified bound admitted fact omitted by inference to repair. The three extra resources retain explicit source relations. No ID was guessed and no future capture was used to improve accuracy.
+
+Concrete engineering changes: deterministic source ZIP bytes across checkout timestamps/line endings, Git-blob archive reconstruction, separate numerical quality/no-regression/official-contract/semantic gates, output-content privacy review, a sanitized tracked release-record generator, and exact post-session trace instructions. There are 118 passing unit/synthetic integration tests, including two archive-integrity regressions. Fresh isolated pypdf installation from official PyPI and package-origin/user-site checks passed after a workspace TEMP workaround; the full release runs in that virtual environment.
+
+The new local source-review experiment made two bounded gemma4:e4b batch calls and both failed validation. Deterministic baseline was 6/6; no model score or benefit is claimed, and valid-output reproducibility was not established. It stays evaluation-only. Combined observed local development experiments now total 11 calls, 2,545 input and 1,717 output tokens. Final dataset inference uses zero LLM calls. Local compute/engineering costs remain unmeasured; no rejected cloud credential was retried.
+
+output.csv passes content privacy review, but its conditional public GitHub commit is withheld because event-specific publication terms could not be verified. Source, reports and a sanitized hash record are version-controlled; ZIP, transcript and raw traces remain excluded. Final trace ZIP is NOT VERIFIED until relevant sessions end, the coding application closes and staged copies are reviewed/redacted. See FINAL_RELEASE_RECORD.md, EXACT_CASE_AUDIT.md, TRACE_FINALIZATION.md and the generated evaluation/usage reports. No HackerRank upload or AI interview occurred.
+
+The earlier implementation notes below are historical; current executed reports and the release record take precedence.
+
 # GhostTrace Guard checkpoint and interview notes
 
 ## Current final-candidate continuation

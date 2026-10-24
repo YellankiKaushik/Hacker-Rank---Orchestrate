@@ -1,6 +1,6 @@
 # Unresolved evidence and execution issues
 
-Updated 2026-10-24T18:55:03.992821+00:00. Strict unresolved 91; candidate 518 rows; uncertain 91. Recovered B: case_112, case_155, case_204, case_213, case_297, case_308, case_57. Candidate row coverage does not resolve source gaps. Separate per-case assumptions/omitted obligations are in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md.
+Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 rows; uncertain 91. Recovered B: case_112, case_155, case_204, case_213, case_297, case_308, case_57. Candidate row coverage does not resolve source gaps. Separate per-case assumptions/omitted obligations are in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md.
 
 | Case | Admitted evidence examined | Missing fact and impact | Candidate; recommended next action |
 |---|---|---|---|
@@ -113,4 +113,6 @@ Updated 2026-10-24T18:55:03.992821+00:00. Strict unresolved 91; candidate 518 ro
 - Unsupported COMPLETE predictions assume no additional untreated copy; unknown-required-state INCOMPLETE does not assert an active violation. Every assumption is counted separately. Emitted citation/operation PASS checks do not establish global semantic certainty.
 - Missing sample account/analytics/security operations lack admissible bindings or exist only in excluded later captures. Evidence-supported attachment/account/tombstone extras remain even when omitted from public references. More linkage cannot be obtained by copying golden IDs.
 - Installed local AI works on four bounded authored intent fixtures; final runtime needs zero calls. Initial malformed replies were rejected, then fixed by explicit JSON instructions. Tiny fixture success does not establish full-dataset gain. The rejected cloud credential was not retried.
-- Fresh isolated dependency installation is NOT VERIFIED; existing runtime imports/tests pass. Final raw trace export waits until session ends and app closes as required by the official instructions. Originals remain preserved. No HackerRank upload occurred.
+- A fresh isolated virtualenv installed pinned pypdf from official PyPI after a workspace TEMP workaround for sandbox ACL. verify_environment.py checks dependency origin/user-site isolation; the release checker records actual clean execution. Final raw trace export waits until session ends and app closes as required by official instructions. Originals remain preserved. No HackerRank upload occurred.
+- Output privacy review passes. Contest-specific public-publication terms remain NOT VERIFIED: the registration page requires login, and Windows browser automation stopped because it could not verify the URL. The conditional public output commit is withheld; its hash is recorded in the sanitized GitHub release record. General content ownership does not establish event-specific permission.
+- New source-review AI batches failed bounded validation and were not used. No accuracy benefit or complete reproducibility is claimed for that optional experiment.

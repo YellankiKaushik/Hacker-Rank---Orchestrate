@@ -1,14 +1,14 @@
 # HackerRank Orchestrate - October 2026
 
-## GhostTrace Guard candidate
+## GhostTrace Guard 0.4.0 candidate
 
 **B: structurally valid with documented semantic uncertainty.** The candidate produces all 518 rows. Strict audit accepts 427 and withholds 91; seven previous blockers now pass the contract-based obligation check. All 1,031 cited steps pass source/time/provenance checks. Semantic certainty remains FAIL, including case_55's uncertainty-only empty plan. Do not interpret row coverage as proof that deletion is complete.
 
-Public sample: primary 29/32 statuses; strict GhostGuard 24/32; every-row candidate 29/32. All variants have 9/32 exact cases. Exact accuracy has not substantially improved. There are 116 passing test methods. Reports include every sample case and all remaining limitations.
+Public sample: primary 29/32 statuses; strict GhostGuard 24/32; every-row candidate 29/32. All variants have 9/32 exact cases. Exact accuracy has not substantially improved. There are 118 passing test methods. Reports include every sample case and all remaining limitations.
 
 ### Setup and execution
 
-Python 3.12+ and `pip install -r code/requirements.txt` provide the parser dependency (pypdf). Windows screenshot extraction uses Windows.Media.Ocr with an English language pack and PowerShell; the source-hash cache is excluded from Git and ZIP. A fresh isolated dependency install is NOT VERIFIED. The installed runtime and cold OCR have been exercised. On another OS supply a compatible OCR adapter rather than assuming Windows OCR is available.
+Python 3.12+ and `pip install -r code/requirements.txt` provide the parser dependency (pypdf). Windows screenshot extraction uses Windows.Media.Ocr with an English language pack and PowerShell; the source-hash cache is excluded from Git and ZIP. A clean isolated virtualenv installed pinned pypdf from official PyPI and passed isolation checks. Full release checks run in that environment; cold OCR was separately exercised. On another OS supply a compatible OCR adapter rather than assuming Windows OCR is available.
 
 From the repository root:
 
@@ -69,6 +69,29 @@ Cloud OpenAI transport requires OPENAI_API_KEY, GHOSTTRACE_AI_PROVIDER=openai, a
 - log.txt: private append-only transcript, separate from Git and the code ZIP.
 
 Original session traces remain preserved. Follow agent_trace_instructions.md: finish sessions and close the app before copying relevant traces, redact staged copies, then archive separately. Final trace ZIP is NOT VERIFIED while this session is active. No HackerRank upload has occurred.
+
+Final engineering checks classify all 23 sample mismatches in `code/docs/EXACT_CASE_AUDIT.md`: 20 missing account checks, seven retained-record checks and seven analytics checks. No bound admitted fact omitted by inference was found. No new relationship or accuracy gain is claimed since d98e485. Candidate precision remains 114/164 (69.51%) and recall 114/193 (59.07%), with 34 missing and three extra reference resources.
+
+Two new bounded batches of local source-claim review were rejected by validation (1,240 input/1,536 output tokens); deterministic baseline was 6/6. That optional experiment is not enabled for final inference. Total observed local development experiments are 11 calls and 2,545 input/1,717 output tokens, separate from the final run's zeros. No model accuracy score is inferred from invalid replies.
+
+The release checker separates tests, no regression, numerical quality, official contract validity, evidence completeness and packaging. The source ZIP uses fixed metadata, sorted members and LF-normalized source for reproducible bytes. `code/docs/FINAL_RELEASE_RECORD.md` records artifact hashes and is deliberately excluded from the ZIP to avoid a recursive hash. `code/check_tracked_archive.py` verifies the archive against committed source. Do not commit ZIPs or private logs/traces.
+
+For the clean-environment release check actually exercised here:
+
+```powershell
+$base = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+$env:TEMP = Join-Path (Get-Location) 'tmp\install-temp'
+$env:TMP = $env:TEMP
+New-Item -ItemType Directory -Path $env:TEMP -Force | Out-Null
+& $base -m venv tmp/release-venv
+$clean = '.\tmp\release-venv\Scripts\python.exe'
+& $clean -m pip install --index-url https://pypi.org/simple -r code/requirements.txt
+& $clean -X utf8 code/verify_environment.py
+& $clean -X utf8 code/evaluation/generate_reports.py
+& $clean -X utf8 code/release_check.py
+```
+
+Output privacy inspection passed. The conditional public GitHub CSV commit is withheld because contest-specific publication terms remain unverified; the official registration page requires login and browser automation could not verify the active URL. The sanitized release record preserves its hash. Exact trace candidates and post-session archive commands are in `code/docs/TRACE_FINALIZATION.md`.
 
 The original official starter instructions follow.
 
