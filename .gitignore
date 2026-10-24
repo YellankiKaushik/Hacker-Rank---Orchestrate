@@ -1,0 +1,14 @@
+log.txt
+agent-trace/
+agent-trace.zip
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.zip
+/output.csv
+/tmp/
+/artifacts/
