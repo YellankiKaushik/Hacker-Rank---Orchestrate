@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 from ghosttrace.loader import Corpus,read_csv
 from ghosttrace.validator import validate_file
+from ghosttrace.semantic_validation import validate_semantic_file
 
 if __name__=='__main__':
     root=Path(__file__).resolve().parents[1]
@@ -13,5 +14,5 @@ if __name__=='__main__':
     args=parser.parse_args()
     corpus=Corpus(args.dataset)
     cases=read_csv(args.requests or args.dataset/'deletion_requests.csv')
-    count=validate_file(args.output,cases,corpus.sources)
-    print(f'Validated {count} sorted cases, exact schema, enums, ordering and citation timestamps.')
+    count=validate_semantic_file(args.output,cases,corpus,args.dataset.parent/'tmp/ocr')
+    print(f'Validated {count} sorted cases, schema, source/observation times, source states, identity bindings and policy.')

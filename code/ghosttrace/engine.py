@@ -3,8 +3,14 @@ from dataclasses import replace
 from .models import Audit, Fact, timestamp, tokens
 from .identity import IdentityGraph
 from .intent import deletion_intent
+from .intent import AmbiguousIntent
 from .policy import Policy
 from .compiler import compile_steps
+from .relationships import RelationshipIndex,declared_subjects
+from .adapters import DEFAULT_CATEGORY
+from .adapters import EvidenceIndex
+from types import SimpleNamespace
+import hashlib
 
 
 class UnresolvedCase(ValueError):
@@ -12,44 +18,74 @@ class UnresolvedCase(ValueError):
 
 
 class Engine:
-    def __init__(self,corpus,index):
+    def __init__(self,corpus,index,intent_ai=None):
         self.corpus,self.index = corpus,index
         self.identity = IdentityGraph(corpus.identities,corpus.history)
         self.policy = Policy(corpus.rules)
+        self.relationships=RelationshipIndex(corpus,index)
+        self.intent_ai=intent_ai
+        self._reinvestigation_cache={}
+        self.source_cache_hits=0
+        self.source_reads=0
 
     def investigate(self,case):
-        if not deletion_intent(case['request_text']):
+        try:
+            intent=deletion_intent(case['request_text'])
+        except AmbiguousIntent:
+            intent=self.intent_ai.classify(case['request_text']) if self.intent_ai else None
+            if intent is None: raise
+        if not intent:
             return Audit(case,'',[],'NOT_APPLICABLE',[])
         cutoff = timestamp(case['audit_at'])
         subject,aliases = self.identity.resolve(case['email'],cutoff)
-        keys = set()
+        bindings=self.relationships.bind(subject,aliases,cutoff)
+        keys = set(bindings)
         matched_sources = set()
         for alias in aliases:
             for f in self.index.by_token.get(alias,[]):
                 if f.admissible(cutoff) and (not f.data.get('_link_at') or timestamp(f.data['_link_at'])<=cutoff):
-                    keys.add((f.system,f.resource)); matched_sources.add(f.source)
-        # Temporal resource bindings are established by real observations/catalog entries.
-        for row in self.corpus.activities:
-            if row['event_type']=='LINK_RESOURCE_IDENTITY' and timestamp(row['event_time'])<=cutoff and aliases & tokens(row['details']):
-                keys.add((row['target_system'],row['resource_id']))
+                    matched_sources.add(f.source)
         selected = []
         issues = []
         for key in sorted(keys):
             observations = [f for f in self.index.by_resource[key] if f.admissible(cutoff)]
-            if not observations: continue
             categories = {f.category for f in observations}
+            if not categories and key[0] in DEFAULT_CATEGORY:
+                categories.add(DEFAULT_CATEGORY[key[0]])
             # Use positive source-scoped inventory queries to prove missing rows, never lack of retrieved files.
             for snapshot in self.index.snapshots:
-                if (snapshot.source in matched_sources and snapshot.system==key[0]
+                if ((snapshot.source in matched_sources or (bindings[key].kind=='SOURCE_RESOURCE_REFERENCE' and snapshot.exhaustive)) and snapshot.system==key[0]
                     and snapshot.category in categories and snapshot.captured<=cutoff
                     and key[1] not in snapshot.resources):
                     observations.append(Fact(snapshot.source,snapshot.captured,snapshot.observed,key[0],key[1],
-                        snapshot.category,'ABSENT',{'_query_resource':key[1]},snapshot.scope,'scoped inventory absence'))
+                        snapshot.category,'ABSENT',{'_query_resource':key[1],'_query_system':key[0]},snapshot.scope,'scoped inventory absence'))
+            if not observations:
+                issues.append(f'Linked resource has no admissible state: {key[0]}/{key[1]}')
+                continue
+            if categories & {'BACKUP_ARCHIVE','DATA_FLOW'}:
+                known=[f for f in observations if f.state!='UNKNOWN']
+                # A later storage listing observes existence, not a permission/configuration change.
+                if known: observations=known
             latest_time = max(f.observed for f in observations)
             latest = [f for f in observations if f.observed==latest_time]
             # At one instant, every replica must comply; positive violating copies beat a primary absence.
             latest.sort(key=lambda f:(bool(self.policy.violation(f,cutoff)),f.captured,f.source,f.scope),reverse=True)
             fact = latest[0]
+            replica_latest={}
+            for observed in observations:
+                if 'replica' not in observed.scope: continue
+                prior=replica_latest.get(observed.scope)
+                if prior is None or observed.observed>prior.observed:
+                    replica_latest[observed.scope]=observed
+                elif observed.observed==prior.observed and self.policy.violation(observed,cutoff):
+                    replica_latest[observed.scope]=observed
+            remaining=[f for f in replica_latest.values() if self.policy.violation(f,cutoff)]
+            if remaining and not self.policy.violation(fact,cutoff):
+                issues.append(f'Conflicting replica scope: {key[0]}/{key[1]}')
+                fact=max(remaining,key=lambda f:(f.observed,f.captured,f.source))
+            owners=declared_subjects(fact,set(self.identity.identities))
+            if owners and owners!={subject}:
+                raise UnresolvedCase(f'{case["case_id"]}: conflicting resource ownership at {fact.source}/{fact.resource}')
             if len({f.state for f in latest})>1:
                 issues.append(f'Conflicting simultaneous observations: {key[0]}/{key[1]}')
             if fact.state=='UNKNOWN':
@@ -62,4 +98,46 @@ class Engine:
         if not selected:
             raise UnresolvedCase(f'{case["case_id"]}: no admissible subject-linked state evidence')
         status,steps = compile_steps(selected,self.policy,cutoff)
-        return Audit(case,subject,selected,status,steps,issues)
+        return Audit(case,subject,selected,status,steps,issues,bindings=bindings)
+
+    def reinvestigate(self,case,audit,max_sources=4):
+        """Reread only admissible sources touching this subject; never invent a link.
+
+        New facts can repair an indexing/cache omission. Unidentified 404s remain
+        unidentified. A mutated source is rejected instead of silently trusted.
+        """
+        cutoff=timestamp(case['audit_at'])
+        _,aliases=self.identity.resolve(case['email'],cutoff)
+        candidates={f.source for f in self.index.facts if f.admissible(cutoff)
+                    and aliases & f.binding_tokens}
+        candidates.update(f.source for f in audit.facts)
+        candidates.update(link.source for link in audit.bindings.values())
+        rows=[r for r in self.corpus.manifest if r['file_id'] in candidates and timestamp(r['captured_at'])<=cutoff]
+        rows=sorted(rows,key=lambda r:(r['captured_at'],r['file_id']),reverse=True)[:max_sources]
+        for row in rows:
+            path=self.corpus.root/row['file_path']
+            if hashlib.sha256(path.read_bytes()).hexdigest()!=self.index.source_hashes[row['file_id']]:
+                raise UnresolvedCase('Source changed during investigation; retry requires a new frozen run')
+        if not rows: return audit,self.index,[]
+        selected_ids={r['file_id'] for r in rows}
+        cache_key=tuple(sorted(selected_ids))
+        if cache_key in self._reinvestigation_cache:
+            self.source_cache_hits+=1
+            merged=self._reinvestigation_cache[cache_key]
+            return Engine(self.corpus,merged,self.intent_ai).investigate(case),merged,sorted(selected_ids)
+        self.source_reads+=len(rows)
+        partial=EvidenceIndex(SimpleNamespace(root=self.corpus.root,manifest=rows,activities=self.corpus.activities),
+                              getattr(self.index,'cache_dir',None))
+        merged=EvidenceIndex.__new__(EvidenceIndex)
+        combined=[f for f in self.index.facts if f.source not in selected_ids]+partial.facts
+        dedup={(f.source,f.system,f.resource,f.observed,f.scope,f.locator):f for f in combined}
+        merged.facts=list(dedup.values())
+        merged.snapshots=[s for s in self.index.snapshots if s.source not in selected_ids]+partial.snapshots
+        merged.media={**getattr(self.index,'media',{}),**partial.media}
+        merged.coverage=getattr(self.index,'coverage',{})
+        merged.cache_dir=getattr(self.index,'cache_dir',None)
+        merged.source_hashes={**self.index.source_hashes,**partial.source_hashes}
+        merged.rebuild_indexes()
+        self._reinvestigation_cache[cache_key]=merged
+        retried=Engine(self.corpus,merged,self.intent_ai).investigate(case)
+        return retried,merged,sorted(selected_ids)

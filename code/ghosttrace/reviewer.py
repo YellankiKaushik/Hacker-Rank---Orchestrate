@@ -8,12 +8,26 @@ import hashlib
 import re
 from .models import timestamp,tokens
 from .loader import contained_path
-from .adapters import EvidenceIndex,restricted_sql
+from .adapters import EvidenceIndex,restricted_sql,COLLECTIONS,DEFAULT_CATEGORY
 from .validator import validate_audit
+from .relationships import RelationshipIndex
 
 
 class ReviewError(ValueError):
     pass
+
+
+def rejection_category(message):
+    if 'changed during' in message: return 'SOURCE_INTEGRITY'
+    if 'identity binding' in message or 'resource ownership' in message: return 'IDENTITY_CONFLICT'
+    if 'no subject-linked profile' in message: return 'MISSING_PROFILE_LINK_OR_PROOF'
+    if 'Missing linked resource' in message: return 'RETRIEVAL_OMISSION'
+    if 'Missing bound resource' in message or 'no admissible' in message or 'Unresolved state' in message: return 'MISSING_EVIDENCE'
+    if 'Unsupported source' in message: return 'UNSUPPORTED_SOURCE_OR_STATE'
+    if 'Missing final verification' in message: return 'MISSING_VERIFICATION'
+    if 'Unsafe deletion' in message: return 'POLICY_SAFETY'
+    if 'Conflicting' in message: return 'CONTRADICTION'
+    return 'CONTRACT_OR_POLICY'
 
 
 class GhostGuard:
@@ -23,16 +37,28 @@ class GhostGuard:
         self.activities={r['activity_id']:r for r in corpus.activities}
         self.raw_cache={}
         self.reparsed={}
-        self.scan=[(f,tokens(f.data.get('_bindings',f.data))) for f in index.facts]
+        self.scan=[(f,f.binding_tokens) for f in index.facts]
         self.reviewed=0
         self.challenges=0
         self.challenged_cases=set()
+        self.relationships=RelationshipIndex(corpus,index)
+
+    def refresh(self,index):
+        if any(self.index.source_hashes.get(k)!=v for k,v in index.source_hashes.items()):
+            raise ReviewError('Source changed during targeted review')
+        self.index=index
+        self.relationships=RelationshipIndex(self.corpus,index)
+        self.scan=[(f,f.binding_tokens) for f in index.facts]
 
     def source_supports(self,fact):
         """Fetch original source, not primary summary; check locator/scope membership."""
         if fact.source in self.activities:
             row=self.activities[fact.source]
-            return row['resource_id']==fact.resource and row['event_type'] in ('CHECK_DATA_FLOW','CHECK_RESTORE_ACCESS')
+            confirmed=(row['event_type']=='CHECK_DATA_FLOW' and 'remains enabled' in row['details']) or (
+                row['event_type']=='CHECK_RESTORE_ACCESS' and 'can still be restored' in row['details'])
+            return (confirmed and row['resource_id']==fact.resource and row['target_system']==fact.system
+                    and fact.category==DEFAULT_CATEGORY.get(fact.system) and fact.state=='ACTIVE'
+                    and fact.observed==timestamp(row['event_time']) and fact.captured==timestamp(row['event_time']))
         row=self.source_rows.get(fact.source)
         if not row: return False
         path=contained_path(self.corpus.root,row['file_path'])
@@ -48,7 +74,10 @@ class GhostGuard:
         if path.suffix=='.sql':
             if fact.locator=='scoped inventory absence':
                 table=raw.get(fact.scope)
-                return table is not None and not any(r.get('resource_id')==fact.resource for r in table)
+                if table is None: return False
+                scoped=[r for r in table if ('origin_system' not in r or
+                    (r['origin_system']==fact.system and COLLECTIONS.get(r.get('collection_name'),('',''))[1]==fact.category))]
+                return not any(r.get('resource_id')==fact.resource for r in scoped)
         if fact.source not in self.reparsed:
             fresh=EvidenceIndex.__new__(EvidenceIndex)
             fresh.facts=[]; fresh.snapshots=[]; fresh.media={}
@@ -74,6 +103,12 @@ class GhostGuard:
         cutoff=timestamp(audit.case['audit_at'])
         issues=[]
         fact_map={(f.system,f.resource):f for f in audit.facts}
+        if audit.bindings:
+            for key,link in audit.bindings.items():
+                if not self.relationships.validates(key,link,aliases,cutoff,audit.bindings):
+                    issues.append(f'Invalid identity binding: {key[0]}/{key[1]}')
+                if key not in fact_map:
+                    issues.append(f'Missing bound resource state: {key[0]}/{key[1]}')
         if audit.status=='COMPLETE' and not any(
             (f.category=='USER_PROFILE' and f.state=='ABSENT') or
             (f.category=='ACCOUNT_TOMBSTONE' and f.state=='REDACTED') for f in audit.facts):
@@ -98,8 +133,17 @@ class GhostGuard:
             key=step['system_id'],step['resource_id']
             fact=fact_map.get(key)
             if not fact: issues.append(f'Uninvestigated step resource: {key}')
-            elif step['evidence_id'] and step['evidence_id']!=fact.source:
-                issues.append(f'Citation is not the supporting source: {key}')
+            else:
+                finding,remedy,verification=policy.operations(fact,cutoff)
+                if fact.state=='ABSENT' and verification in ('VERIFY_RECORD_REDACTED','VERIFY_RECORD_ANONYMIZED'):
+                    verification='VERIFY_RECORD_ABSENT'
+                permitted={('VERIFICATION',verification)}
+                if policy.violation(fact,cutoff):
+                    permitted.update({('FINDING',finding),('REMEDIATION',remedy)})
+                if (step['phase'],step['operation']) not in permitted:
+                    issues.append(f'Unsupported policy operation/state: {key}/{step["operation"]}')
+                if step['evidence_id'] and step['evidence_id']!=fact.source:
+                    issues.append(f'Citation is not the supporting source: {key}')
         # Fresh scan for missing source-linked resources, independent of primary retrieval index.
         for fact,source_tokens in self.scan:
             if not fact.admissible(cutoff): continue

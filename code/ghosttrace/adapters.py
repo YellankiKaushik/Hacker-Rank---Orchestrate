@@ -93,6 +93,7 @@ class Snapshot:
     category: str
     scope: str
     resources: set
+    exhaustive: bool = False
 
 
 def restricted_sql(text):
@@ -198,11 +199,14 @@ class EvidenceIndex:
             self.coverage[extension] += 1
         self.link_documents(corpus)
         self.activity_observations(corpus)
+        self.rebuild_indexes()
+
+    def rebuild_indexes(self):
         self.by_resource = defaultdict(list)
         self.by_token = defaultdict(list)
         for fact in self.facts:
             self.by_resource[(fact.system,fact.resource)].append(fact)
-            for token in tokens(fact.data.get('_bindings',fact.data)):
+            for token in fact.binding_tokens:
                 self.by_token[token].append(fact)
 
     def add(self, source, system, resource, category, data, observed=None, scope='', locator=''):
@@ -254,7 +258,10 @@ class EvidenceIndex:
                 system,category = COLLECTIONS[name]
                 for row in rows:
                     self.add(source,system,row['resource_id'],category,row,source['_captured'],name,row['resource_id'])
-                self.snapshots.append(Snapshot(source['file_id'],source['_captured'],source['_captured'],system,category,name,{r['resource_id'] for r in rows}))
+                # Dedicated physical-table captures can answer a referenced primary-key query.
+                # Service inventory exports are scoped batches, not an all-customer census.
+                exhaustive=name in ('customer_profiles_primary','customer_profiles_failover_replica','search_documents_primary')
+                self.snapshots.append(Snapshot(source['file_id'],source['_captured'],source['_captured'],system,category,name,{r['resource_id'] for r in rows},exhaustive))
 
     def logs(self, source, text):
         for time,data,line in log_rows(text):
@@ -303,7 +310,10 @@ class EvidenceIndex:
                 folded = re.sub(r'\s+',' ',text).casefold()
                 # Catalog display label joins the media to a resource; numeric suffixes never do.
                 label = reference.casefold()
-                if label not in folded and row['resource_id'].casefold() not in folded:
+                # OCR can turn a printed underscore into a space. Only normalize this
+                # separator for an already supplied stable reference; no fuzzy name/ID joins.
+                label_pattern=r'(?<!\w)'+re.escape(label).replace('_',r'[_\s]+')+r'(?!\w)'
+                if not re.search(label_pattern,folded) and row['resource_id'].casefold() not in folded:
                     continue
                 system = row['target_system']
                 # A shared subject ID in an unrelated document does not identify this resource.

@@ -47,6 +47,8 @@ class Policy:
                 'DISABLE':state=='ACTIVE'}[action]
 
     def operations(self, fact, cutoff):
+        if fact.category in ('ACCOUNT_TOMBSTONE','SUPPORT_MESSAGE') and fact.state=='ABSENT':
+            raise ValueError('Required retained context/reference is absent; no permitted restoration operation is defined')
         action = self.action(fact,cutoff)
         if fact.category=='BACKUP_ARCHIVE': return ('REPORT_RESTORE_RISK','BLOCK_RESTORE','VERIFY_RESTORE_BLOCKED')
         return {

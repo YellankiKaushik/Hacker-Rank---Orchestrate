@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
+from functools import cached_property
 import re
 
 
@@ -13,6 +14,17 @@ def timestamp(value: str) -> datetime:
 
 def normalize(value: Any) -> str:
     return str(value).strip().casefold()
+
+
+def identifier_keys(value) -> set[str]:
+    key=normalize(value)
+    result={key} if key else set()
+    if re.fullmatch(r'(?:\+|00)[\d ()-]+',key):
+        digits=re.sub(r'\D','',key)
+        if key.startswith('00'): digits=digits[2:]
+        if 8<=len(digits)<=15:
+            result.add('phone:+'+digits)
+    return result
 
 
 def strings(value):
@@ -30,9 +42,11 @@ def tokens(value) -> set[str]:
     """Exact atoms, never substring user_1/user_10 or name-based joins."""
     found = set()
     for text in strings(value):
-        found.add(normalize(text))
+        found.update(identifier_keys(text))
         found.update(normalize(v) for v in re.findall(
             r'[\w.+-]+@[\w.-]+\.[a-zA-Z]+|\buser_\d+\b|\b[a-fA-F0-9]{64}\b', text))
+        for phone in re.findall(r'(?<!\w)\+\d[\d ()-]{6,24}\d(?!\d)',text):
+            found.update(identifier_keys(phone))
     return found - {'', 'null', 'none', '[redacted]', 'no direct identifier'}
 
 
@@ -52,6 +66,11 @@ class Fact:
     def admissible(self, cutoff):
         return self.captured <= cutoff and self.observed <= cutoff
 
+    @cached_property
+    def binding_tokens(self):
+        # Facts are treated as immutable; source changes require a new hash-checked parse.
+        return frozenset(tokens(self.data.get('_bindings',self.data)))
+
 
 @dataclass
 class Audit:
@@ -61,3 +80,5 @@ class Audit:
     status: str
     steps: list[dict]
     issues: list[str] = field(default_factory=list)
+    bindings: dict = field(default_factory=dict)
+    coverage_proofs: list = field(default_factory=list)
