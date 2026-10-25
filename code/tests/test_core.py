@@ -36,6 +36,7 @@ RULES=[{'rule_id':f'synthetic_rule_{i}','data_category':category,'condition':'Al
            ('PRODUCT_TELEMETRY','ANONYMIZE'),('EMAIL_DELIVERY_LOG','REDACT'),('MARKETING_PROFILE','DELETE'),
            ('USER_EXPORT','DELETE'),('CACHE_ENTRY','DELETE'),('SECURITY_AUDIT_LOG','RETAIN'),
            ('LEGAL_HOLD_RECORD','RETAIN'),('ACCOUNT_TOMBSTONE','REDACT'),('BACKUP_ARCHIVE','RETAIN')])]
+next(r for r in RULES if r['data_category']=='SUPPORT_ATTACHMENT')['condition']='Attachment belongs only to the deletion subject'
 CASE={'case_id':'synthetic','email':'alex@example.test','audit_at':CUTOFF.isoformat(),
       'requested_at':EARLY.isoformat(),'reported_at':EARLY.isoformat(),
       'reported_status':'COMPLETE','request_text':'Please delete my account.'}
@@ -183,9 +184,10 @@ class PolicyTests(unittest.TestCase):
     def test_attributable_analytics_not_anonymous(self):
         self.assertEqual(state_of('ANALYTICS_PROFILE',{'user_id':'subject_alpha','email':None}),'PII')
 
-    def test_shared_attachment_is_redacted(self):
+    def test_shared_attachment_has_no_unsupplied_policy_fallback(self):
         f=replace(fact(category='SUPPORT_ATTACHMENT'),data={'shared_subjects':['subject_alpha','subject_beta']})
-        self.assertEqual(self.policy.action(f,CUTOFF),'REDACT')
+        self.assertEqual(self.policy.action(f,CUTOFF),'UNKNOWN')
+        self.assertIsNone(self.policy.violation(f,CUTOFF))
 
     def test_backup_blocks_restore_without_deleting_archive(self):
         f=fact(category='BACKUP_ARCHIVE',state='ACTIVE')

@@ -1,6 +1,6 @@
 # Final full-candidate runtime usage
 
-Generated 2026-10-25T01:21:20.924479+00:00. Run generated all 518 of 518 predictions; output SHA-256 `b4301131db2c2f874feadff55dcc38fea0b595d9b1430d7a8f248ed63b57e283`. Strict accepted 415, uncertain 103. Warm-cache runtime 7.9360 seconds.
+Generated 2026-10-25T01:38:45.082737+00:00. Run generated all 518 of 518 predictions; output SHA-256 `b4301131db2c2f874feadff55dcc38fea0b595d9b1430d7a8f248ed63b57e283`. Strict accepted 415, uncertain 103. Warm-cache runtime 6.8914 seconds.
 
 | Final runtime provider/model | Calls | Input tokens | Output tokens | Total tokens | Estimated API USD |
 |---|---:|---:|---:|---:|---:|
@@ -20,3 +20,7 @@ Additional source-review experiment on gemma4:e4b: 2 calls, 1240 input + 1536 ou
 ## Source-repair intent integration experiment
 
 Ollama loopback `gemma4:e4b`: 2 actual calls, 309 input + 49 output = 358 tokens; API fee $0.00. End-to-end accepted 2/2 authored fixtures (one deletion, one temporary suspension), through Engine, Guard, atomic CSV writing and fresh source validation. Both deterministic baselines abstain. No dataset accuracy improvement is inferred. Initial sandbox socket denials made two transport attempts, zero successful model calls and no returned token usage; they are recorded separately, not as zero-token completions. The final 518-case run above still uses zero model calls.
+
+## Final targeted review
+
+TARGETED_ACCURACY_REVIEW.md records all twelve dated ownership reviews and the replayed case_13 regression. No accuracy recovery is supported. Singleton lists without exclusivity attestations stay UNKNOWN; shared attachments have no supplied REDACT fallback. Four new tests cover these semantics and source-boolean integrity. Final inference remains zero model calls/tokens; historical experiments are separate.

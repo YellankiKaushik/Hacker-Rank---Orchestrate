@@ -1,6 +1,6 @@
 # Measured two-mode evaluation
 
-Generated 2026-10-25T01:21:20.924479+00:00. **B: structurally valid candidate with documented semantic uncertainty.** There is no hidden-answer score. Full candidate coverage is 518/518; strict evidence-proven coverage under the implemented finite-source review is 415/518. This is not exhaustive knowledge of every possible copy.
+Generated 2026-10-25T01:38:45.082737+00:00. **B: structurally valid candidate with documented semantic uncertainty.** There is no hidden-answer score. Full candidate coverage is 518/518; strict evidence-proven coverage under the implemented finite-source review is 415/518. This is not exhaustive knowledge of every possible copy.
 
 ## Public sample: all 32 cases
 
@@ -45,14 +45,14 @@ GhostGuard does not improve measured sample status accuracy: 27/32 primary versu
 - Uncertain predictions: 103; unsupported full-proof status inferences: 103; fabricated references: 0.
 - Source-backed cited steps: 1019/1019. Future work uses empty evidence IDs.
 - Structure, emitted citation/time/provenance/policy-operation gates PASS. Semantic certainty FAIL.
-- Output SHA-256 `b4301131db2c2f874feadff55dcc38fea0b595d9b1430d7a8f248ed63b57e283`; warm-cache seconds 7.9360.
+- Output SHA-256 `b4301131db2c2f874feadff55dcc38fea0b595d9b1430d7a8f248ed63b57e283`; warm-cache seconds 6.8914.
 - Targeted rereads 33, source-view cache hits 58; at most one retry/four source files per challenged case.
 
 Unknown required state predicts INCOMPLETE without inventing a particular violation. Observed compliant states with unproven scope predict COMPLETE under an explicitly unverified closed-evidence assumption. Every such inference appears in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. case_55 has no source-supported current-state check: INCOMPLETE with an empty array satisfies CSV/JSON shape but fails strict semantic plan completeness. The existing strict validator remains unchanged and rejects the unproven candidate.
 
 ## Regression coverage and additional participant cases
 
-136 unit/synthetic integration test methods pass. Representative independently authored cases:
+140 unit/synthetic integration test methods pass. Representative independently authored cases:
 
 1. Compliant secondary treatment passes B without an unrelated profile; retention-only proof stays C.
 2. An unobserved linked profile or unidentified account readback stays C; no batch-order assignment is used.
@@ -101,7 +101,7 @@ Installed model `gemma4:e4b`: initial four replies failed strict JSON checks; on
 
 ## Final engineering root-cause audit
 
-All 24 mismatches were classified against original source contents and exact cutoffs. Missing operations: `{'1_ACCOUNT_ABSENCE': 20, '3_ANALYTICS_ANONYMIZATION': 7, '8_POLICY_ACTION': 6, '5_EXTRA_RESOURCE': 3, '2_RETAINED_VERIFICATION': 7}`. Causes: `{'NO_STATE_OBSERVATION': 16, 'MISSING_SUBJECT_SELECTOR': 12, 'MISSING_CONDITIONAL_POLICY_PROOF': 6, 'EXPLICIT_ADMITTED_RELATIONSHIP_DIFFERS_FROM_REFERENCE': 3, 'ONLY_POST_CUTOFF_OBSERVATIONS': 6}`. Bound admissible facts omitted by inference: 0. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No new subject/resource relationship was recovered. Source-verified safety corrections reduce exact sample accuracy from 9/32 to 8/32 by withholding attachment actions without sole-ownership proof; no gain is claimed. The remaining uncertainty groups are `{'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'UNKNOWN_REQUIRED_RESOURCE_STATE_OR_POLICY': 13}`; future-only sources are diagnostic only, never inference inputs.
+All 24 mismatches were classified against original source contents and exact cutoffs. Missing operations: `{'1_ACCOUNT_ABSENCE': 20, '3_ANALYTICS_ANONYMIZATION': 7, '8_POLICY_ACTION': 6, '5_EXTRA_RESOURCE': 3, '2_RETAINED_VERIFICATION': 7}`. Causes: `{'NO_STATE_OBSERVATION': 16, 'MISSING_SUBJECT_SELECTOR': 12, 'MISSING_CONDITIONAL_POLICY_PROOF': 6, 'EXPLICIT_ADMITTED_RELATIONSHIP_DIFFERS_FROM_REFERENCE': 3, 'ONLY_POST_CUTOFF_OBSERVATIONS': 6}`. Bound admissible facts omitted by inference: 0. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No new subject/resource relationship was recovered. Source-verified safety corrections reduce exact sample accuracy from 9/32 to 8/32 by withholding attachment actions without sole-ownership proof; no gain is claimed. The remaining uncertainty groups are `{'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'UNKNOWN_REQUIRED_RESOURCE_STATE_OR_POLICY': 13}`; future-only sources are diagnostic only, never inference inputs.
 
 Previous d98e485 candidate precision 114/164 (69.51%), recall 114/193 (59.07%), missing resources 34, extra 3. Current precision 107/158 (67.72%), recall 107/193 (55.44%), missing 36, extra 3. No improvement is claimed.
 
@@ -112,3 +112,7 @@ Two bounded batches evaluated six authored source claims: deletion-success versu
 ## Source repair checkpoint
 
 See SOURCE_REPAIR_REPORT.md for exact defects, the preserved baseline and measured safety-driven regression. Missing attachment exclusivity is an unresolved policy condition; it does not authorize DELETE. General media row geometry and broader ambiguous intent remain limited.
+
+## Final targeted review
+
+TARGETED_ACCURACY_REVIEW.md records all twelve dated ownership reviews and the replayed case_13 regression. No accuracy recovery is supported. Singleton lists without exclusivity attestations stay UNKNOWN; shared attachments have no supplied REDACT fallback. Four new tests cover these semantics and source-boolean integrity. Final inference remains zero model calls/tokens; historical experiments are separate.

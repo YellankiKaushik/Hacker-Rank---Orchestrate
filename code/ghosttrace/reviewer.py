@@ -105,7 +105,7 @@ class GhostGuard:
                 fresh.media={fact.source:raw}
                 fresh.link_documents(self.corpus)
             self.reparsed[fact.source]=fresh.facts
-        critical=('retention_until','retained_until','legal_hold_active','shared_subjects')
+        critical=('retention_until','retained_until','legal_hold_active','shared_subjects','sole_owner')
         return any((f.system,f.resource,f.category,f.state,f.observed,f.scope)==
                    (fact.system,fact.resource,fact.category,fact.state,fact.observed,fact.scope)
                    and tokens(fact.data)<=tokens(f.data)

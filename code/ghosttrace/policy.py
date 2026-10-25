@@ -6,18 +6,23 @@ from .controls import boolean
 
 def attachment_ownership(data):
     """A subject selector proves association; sole ownership needs its own witness."""
+    shared=False
     if 'shared_subjects' in data:
         owners=data['shared_subjects']
         if not isinstance(owners,list) or not owners or any(not isinstance(v,str) or not v.strip() for v in owners):
             return 'UNKNOWN'
-        return 'SHARED' if len(set(owners))>1 else 'SOLE'
+        # A list of known users is a lower bound unless its schema explicitly
+        # attests exclusivity. No participant schema makes this list exhaustive.
+        shared=len(set(owners))>1
     details=data.get('_link_details','').casefold()
-    if 'belongs only to' in details and 'no other subject is linked' in details:
-        return 'SOLE'
+    attested='belongs only to' in details and 'no other subject is linked' in details
     if 'sole_owner' in data:
         value=boolean(data['sole_owner'])
-        if value is True: return 'SOLE'
-    return 'UNKNOWN'
+        if value is None or (attested and value is False): return 'UNKNOWN'
+        attested=attested or value is True
+    if attested and shared: return 'UNKNOWN'
+    if attested: return 'SOLE'
+    return 'SHARED' if shared else 'UNKNOWN'
 
 
 class Policy:
@@ -59,8 +64,10 @@ class Policy:
             if 'legal_hold_active' in data and boolean(data['legal_hold_active']) is False:
                 return 'DELETE'
         elif fact.category=='SUPPORT_ATTACHMENT':
-            ownership=attachment_ownership(data)
-            return {'SOLE':'DELETE','SHARED':'REDACT','UNKNOWN':'UNKNOWN'}[ownership]
+            if rule['condition']=='Attachment belongs only to the deletion subject':
+                # The supplied rule has no shared-attachment REDACT fallback.
+                # A shared or incomplete owner set does not authorize DELETE.
+                return action if attachment_ownership(data)=='SOLE' else 'UNKNOWN'
         return action
 
     def violation(self, fact, cutoff):

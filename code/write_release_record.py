@@ -36,6 +36,8 @@ def main():
             f"{u['input_tokens']} input/{u['output_tokens']} output tokens, API USD {u['estimated_cost_usd']:.2f}; accepted {pipeline['accepted']}/2 authored fixtures "
             "through source review, export and fresh validation. Initial sandbox socket denials are transport failures with no model usage returned. "
             "These measurements do not enter final inference totals or establish dataset accuracy gain.\n")
+    targeted_path=ROOT/'artifacts/targeted_review.json'
+    targeted=json.loads(targeted_path.read_text()) if targeted_path.exists() else None
     record=f'''# Final release record — GhostTrace Guard {__version__}
 
 Classification: **B — structurally valid with documented semantic uncertainty**. Fully evidence-proven submission readiness: **FAIL**. No upload, AI interview, hidden score or leaderboard position is claimed.
@@ -133,6 +135,8 @@ Trace ZIP: **NOT VERIFIED** while the session remains active. Follow code/docs/T
 
 Required coverage/link and attachment ownership proof remain unresolved; see the per-case report. case_55 lacks target restore permission at 2026-04-30T11:00:00Z. Archive existence and association do not establish restoration access. No restore-risk or blocked-restoration step is fabricated. Its empty INCOMPLETE plan is structurally valid but does not fulfill semantic plan requirements. This is an available candidate for participant review, not a fully validated official-contract submission. No HackerRank upload occurred.
 '''
+    if targeted:
+        record+='\n## Final targeted ownership and accuracy review\n\nBaseline 43990d0: 136 tests, 29/32 statuses, 8/32 exact, 107/158 precision, 107/193 recall, 415 strict accepted and 103 uncertain. All twelve attachment cases remain UNKNOWN: dated association is proven, exclusivity is not. Replayed 5b9a098 exactly matched reference case_13 by assuming sole ownership of support_4218; the source only proves FOUND and association. No safe accuracy recovery or new relationship was found. Singleton lists now require an explicit exclusivity attestation; shared attachments cannot acquire an unsupplied REDACT action. Four new tests cover these semantics and original-source boolean integrity. See TARGETED_ACCURACY_REVIEW.md for exact original/current/reference arrays and all twelve source/selector/cutoff findings. Current measurements and all release gates are shown above.\n'
     path=ROOT/'code/docs/FINAL_RELEASE_RECORD.md'; path.write_text(record,encoding='utf-8')
     print(json.dumps({'record':str(path.relative_to(ROOT)),'implementation_commit':commit,
                       'output_sha256':release['output_sha256'],'zip_sha256':release['package']['sha256'],

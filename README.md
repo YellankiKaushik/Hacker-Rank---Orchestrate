@@ -1,10 +1,10 @@
 # HackerRank Orchestrate - October 2026
 
-## GhostTrace Guard 0.5.0
+## GhostTrace Guard 0.5.1
 
 **B: structurally valid with documented semantic uncertainty.** Candidate rows 518/518; strict accepted 415; uncertain 103. Source/citation/time checks validate emitted claims, not missing obligations. The official strict validator rejects the unproven candidate, including case_55's empty plan.
 
-Public sample: primary statuses 27/32, reviewed 22/32, candidate 29/32; exact candidate 8/32. Precision 67.72%, recall 55.44%. Tests 136 passed, zero failed. Safety corrections reduce exact matches from 9 to 8; no accuracy gain or hidden score is claimed. See `code/docs/SOURCE_REPAIR_REPORT.md` and mandatory `code/evaluation/evaluation_report.md` / `usage_report.md`.
+Public sample: primary statuses 27/32, reviewed 22/32, candidate 29/32; exact candidate 8/32. Precision 67.72%, recall 55.44%. Tests 140 passed, zero failed. Safety corrections reduce exact matches from 9 to 8; no accuracy gain or hidden score is claimed. See `code/docs/SOURCE_REPAIR_REPORT.md` and mandatory `code/evaluation/evaluation_report.md` / `usage_report.md`.
 
 ### Run
 

@@ -227,3 +227,5 @@ Updated {now}. Strict unresolved {len(full['unresolved'])}; candidate 518 rows; 
     save(ROOT/'tmp/checkpoint.json',checkpoint); print(json.dumps(checkpoint,indent=2))
     from evaluation.repair_report import generate as repair_report
     repair_report(ROOT,full,{'primary':p,'strict':s,'candidate':c,'tests':count},index)
+    from evaluation.targeted_review import generate as targeted_review
+    targeted_review(ROOT,corpus,index,full,{'primary':p,'strict':s,'candidate':c,'tests':count})

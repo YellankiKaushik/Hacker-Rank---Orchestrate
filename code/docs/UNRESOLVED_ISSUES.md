@@ -1,6 +1,6 @@
 # Unresolved evidence and execution issues
 
-Updated 2026-10-25T01:21:20.924479+00:00. Strict unresolved 103; candidate 518 rows; uncertain 103. Recovered B: case_112, case_155, case_204, case_213, case_297, case_308, case_57. Candidate row coverage does not resolve source gaps. Separate per-case assumptions/omitted obligations are in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md.
+Updated 2026-10-25T01:38:45.082737+00:00. Strict unresolved 103; candidate 518 rows; uncertain 103. Recovered B: case_112, case_155, case_204, case_213, case_297, case_308, case_57. Candidate row coverage does not resolve source gaps. Separate per-case assumptions/omitted obligations are in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md.
 
 | Case | Admitted evidence examined | Missing fact and impact | Candidate; recommended next action |
 |---|---|---|---|
@@ -153,3 +153,7 @@ Association and observed existence are verified; exclusive ownership is not. The
 | case_479 | support_platform/support_4665 | evidence_45 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
 | case_503 | support_platform/support_2295 | evidence_47 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
 | case_515 | support_platform/support_4533 | evidence_48 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+
+## Final targeted review
+
+TARGETED_ACCURACY_REVIEW.md records all twelve dated ownership reviews and the replayed case_13 regression. No accuracy recovery is supported. Singleton lists without exclusivity attestations stay UNKNOWN; shared attachments have no supplied REDACT fallback. Four new tests cover these semantics and source-boolean integrity. Final inference remains zero model calls/tokens; historical experiments are separate.

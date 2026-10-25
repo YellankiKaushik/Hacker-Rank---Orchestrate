@@ -1,6 +1,6 @@
 # Contract and recovery audit
 
-Generated 2026-10-25T01:21:20.924479+00:00. Blanket profile proof replaced by relevant obligations; A/B accept, C/D/E block. Previous 97-case cluster re-evaluated: 7 accepted B, 90 unresolved C. case_55 separately remains unknown. Strict coverage 415/518; candidate 518/518 with 103 unproven predictions.
+Generated 2026-10-25T01:38:45.082737+00:00. Blanket profile proof replaced by relevant obligations; A/B accept, C/D/E block. Previous 97-case cluster re-evaluated: 7 accepted B, 90 unresolved C. case_55 separately remains unknown. Strict coverage 415/518; candidate 518/518 with 103 unproven predictions.
 
 The contract quantifies relevant records without prescribing one universal category. B requires substantive compliant treatment, all dated bound obligations covered and no anonymous root observation in the subject-linked source. Retention alone does not establish deletion. No IDs were assigned by timing, position or suffix.
 
@@ -115,7 +115,7 @@ Anonymous 404s/anonymized rows establish state for a resource without identifyin
 
 ## d98e485 continuation
 
-New relationships recovered: 0. Remaining group census: `{'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'UNKNOWN_REQUIRED_RESOURCE_STATE_OR_POLICY': 13}`. Raw admitted source/OCR mentions and all missing reference keys were checked in evaluator-only analysis; bound attachment observations with missing conditional-policy proof are withheld; the mismatch audit distinguishes them from repairable engine omissions. Explicit identity-bearing non-catalog activity matches for the samples: 0. More exact matches would require selectors or cutoff-admissible state observations that have not been verified. No repeat blind scan or guessed association is used.
+New relationships recovered: 0. Remaining group census: `{'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'UNKNOWN_REQUIRED_RESOURCE_STATE_OR_POLICY': 13}`. Raw admitted source/OCR mentions and all missing reference keys were checked in evaluator-only analysis; bound attachment observations with missing conditional-policy proof are withheld; the mismatch audit distinguishes them from repairable engine omissions. Explicit identity-bearing non-catalog activity matches for the samples: 0. More exact matches would require selectors or cutoff-admissible state observations that have not been verified. No repeat blind scan or guessed association is used.
 
 ## Source repair checkpoint
 

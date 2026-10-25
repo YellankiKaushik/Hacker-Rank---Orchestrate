@@ -23,7 +23,7 @@ def generate(root,full,sample,index):
             if observations:
                 sources=', '.join(sorted({f.source for f in observations}))
                 ownership_notes+=f"| {issue['case_id']} | {system}/{resource} | {sources} | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |\n"
-    report=f'''# Source-verified repair checkpoint — 0.5.0
+    report=f'''# Source-verified repair checkpoint — 0.5.1
 
 Classification **B: structurally valid with documented semantic uncertainty**. Semantic completeness and official plan validity remain FAIL. No hidden score, accuracy gain or new subject/resource relationship is claimed.
 
@@ -33,7 +33,7 @@ Recoverable pre-edit checkpoint: commit `5b9a0986f06003fb48c643082a8edcfa4b627a9
 
 - `ghosttrace/engine.py`, `adapters.py`, `reviewer.py`: partial service inventories cannot prove absence by same-file membership. Only complete physical primary-key captures with supported schema/snapshot metadata, or explicit source query observations, prove negative state. Both timestamps apply. Reviewer checks original bytes/schema, scope, resource selector, category and manifest time independently of Engine's exhaustive flag.
 - `ghosttrace/controls.py`, `adapters.py`, `engine.py`: typed restore/config controls accept explicit booleans and numeric/string 0/1. Missing, null, malformed, mutually inconsistent fields and simultaneous conflicting controls remain UNKNOWN. Missing lookup result/count no longer implies ABSENT. A newer invalid control readback cannot inherit an older compliant setting. Mere archive existence never supplies permission.
-- `ghosttrace/policy.py`: singleton shared_subjects proves one declared owner; multiple owners select redaction. Missing/malformed exclusivity proof stays UNKNOWN instead of authorizing deletion. Legal-hold/retention booleans normalize explicit false/0 and true/1. Invalid dates abstain. Supplied expired retention and inactive holds permit the policy's deletion action; active retention is preserved.
+- `ghosttrace/policy.py`: a singleton shared_subjects list is not exhaustive; only independent explicit exclusivity proves SOLE. Multiple distinct owners prove SHARED, but the supplied attachment rule has no REDACT fallback. Missing/malformed exclusivity proof stays UNKNOWN instead of authorizing deletion. Legal-hold/retention booleans normalize explicit false/0 and true/1. Invalid dates abstain. Supplied expired retention and inactive holds permit the policy's deletion action; active retention is preserved.
 - `ghosttrace/intent_resolution.py`, `models.py`, `ai.py`, `candidate.py`, `main.py`, `validate_candidate.py`, `semantic_validation.py`, `validate_output.py`: intent provenance carries decision, method, original text, exact quote, validation and confidence through investigation, review and serialization validation. Optional local/cloud interpretation still requires independent contextual support; quotes alone never authorize deletion. Sidecars add no CSV fields. Unrecognized paraphrases/languages remain a documented abstention; the independent bridge currently understands only two anchored authored paraphrases.
 - `adapters.py`, `models.py`, `engine.py`: explicit media panels bound identifier/flow interpretation. Unseparated multiple-subject regions stay UNKNOWN for these state claims. Typed primary/replica roles replace substring topology detection, including regional/read/reporting/failover relations. OCR still lacks general row geometry; this limitation remains open.
 - `reviewer.py`: obligations are reparsed from original files before review, independent of the primary facts/token index. The reviewer checks newer source states and remaining physical replicas as well as policy/identity/source validity. Parsers, extraction and policy remain shared; this is stronger independence, not an independent semantic oracle.
@@ -99,7 +99,7 @@ Release verification separately records original-source and both-cutoff validati
     original=content[content.index(marker):]
     intro=f'''# HackerRank Orchestrate - October 2026
 
-## GhostTrace Guard 0.5.0
+## GhostTrace Guard 0.5.1
 
 **B: structurally valid with documented semantic uncertainty.** Candidate rows {full['resolved']}/518; strict accepted {full['strict_resolved']}; uncertain {len(full['uncertain_cases'])}. Source/citation/time checks validate emitted claims, not missing obligations. The official strict validator rejects the unproven candidate, including case_55's empty plan.
 

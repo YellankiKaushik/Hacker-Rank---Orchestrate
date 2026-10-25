@@ -80,16 +80,16 @@ class SourceRepairTests(unittest.TestCase):
 
     def test_attachment_single_shared_and_unknown_ownership(self):
         p=Policy(RULES); f=fact(category='SUPPORT_ATTACHMENT')
-        for data,expected in [({'shared_subjects':['subject_alpha']},'DELETE'),
-                ({'shared_subjects':['subject_alpha','subject_alpha']},'DELETE'),
-                ({'shared_subjects':['subject_alpha','subject_beta']},'REDACT'),
+        for data,expected in [({'shared_subjects':['subject_alpha']},'UNKNOWN'),
+                ({'shared_subjects':['subject_alpha','subject_alpha']},'UNKNOWN'),
+                ({'shared_subjects':['subject_alpha','subject_beta']},'UNKNOWN'),
                 ({'shared_subjects':[]},'UNKNOWN'),({'shared_subjects':'subject_alpha'},'UNKNOWN'),
                 ({'email':'alex@example.test'},'UNKNOWN')]:
             self.assertEqual(p.action(replace(f,data=data),CUTOFF),expected)
 
     def test_attachment_single_owner_must_be_the_deletion_subject(self):
         f=replace(fact('attachment','support_platform','SUPPORT_ATTACHMENT'),
-            data={'email':'alex@example.test','shared_subjects':['subject_beta']})
+            data={'email':'alex@example.test','shared_subjects':['subject_beta'],'sole_owner':True})
         c,i=fake_environment([f])
         with self.assertRaisesRegex(ValueError,'sole owner is not deletion subject'):
             Engine(c,i).investigate(CASE)
