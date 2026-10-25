@@ -8,21 +8,30 @@ from ghosttrace.adapters import EvidenceIndex
 from ghosttrace.engine import Engine
 from ghosttrace.models import Audit,timestamp
 from ghosttrace.candidate import validate_candidate_file,validate_emitted_sources
+from ghosttrace.intent_resolution import IntentResolution
 from ghosttrace.reviewer import GhostGuard
 
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def validate(path,cases,corpus,cache):
-    count=validate_candidate_file(path,cases,corpus.sources)
+def validate(path,cases,corpus,cache,intent_resolutions=None):
+    count=validate_candidate_file(path,cases,corpus.sources,intent_resolutions)
     index=EvidenceIndex(corpus,cache); engine=Engine(corpus,index); guard=GhostGuard(corpus,index)
     rows={r['case_id']:r for r in read_csv(path)}
     cited=0; unproven=[]; strict=0
     for case in cases:
+        # Revalidate contextual intent; never trust serialized sidecar decisions alone.
+        resolution=(intent_resolutions or {}).get(case['case_id'])
+        if resolution:
+            from ghosttrace.intent_resolution import validated_decision
+            from types import SimpleNamespace
+            validated_decision(case['request_text'],resolution)
+            engine.intent_ai=SimpleNamespace(classify=lambda text,r=resolution:r.decision,last_result={'quote':resolution.quote})
+        else: engine.intent_ai=None
         expected=engine.investigate(case,permit_partial=True)
         row=rows[case['case_id']]
         submitted=Audit(case,expected.subject,expected.facts,row['deletion_status'],json.loads(row['steps_json']),
-                        expected.issues,expected.bindings)
+                        expected.issues,expected.bindings,intent_resolution=expected.intent_resolution)
         if submitted.status!=expected.status or submitted.steps!=expected.steps:
             raise ValueError(f'{case["case_id"]}: artifact differs from source-grounded candidate policy/complete known operations')
         aliases=engine.identity.aliases(timestamp(case['audit_at'])).get(expected.subject,set())
@@ -48,8 +57,10 @@ def main():
     parser.add_argument('--output',type=Path,default=ROOT/'output.csv')
     parser.add_argument('--cache-dir',type=Path,default=ROOT/'tmp/ocr')
     parser.add_argument('--report',type=Path,default=ROOT/'artifacts/candidate_validation.json')
+    parser.add_argument('--intent-resolutions',type=Path,help='Optional internal provenance sidecar; independently checked against each request')
     args=parser.parse_args()
-    result=validate(args.output,read_csv(args.requests or args.dataset/'deletion_requests.csv'),Corpus(args.dataset),args.cache_dir)
+    resolutions={k:IntentResolution(**v) for k,v in json.loads(args.intent_resolutions.read_text()).items()} if args.intent_resolutions else None
+    result=validate(args.output,read_csv(args.requests or args.dataset/'deletion_requests.csv'),Corpus(args.dataset),args.cache_dir,resolutions)
     args.report.parent.mkdir(parents=True,exist_ok=True)
     args.report.write_text(json.dumps(result,indent=2),encoding='utf-8')
     print(json.dumps({k:v for k,v in result.items() if k!='uncertain_cases'},indent=2))

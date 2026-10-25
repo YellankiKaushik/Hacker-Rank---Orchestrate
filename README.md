@@ -1,16 +1,14 @@
 # HackerRank Orchestrate - October 2026
 
-## GhostTrace Guard 0.4.0 candidate
+## GhostTrace Guard 0.5.0
 
-**B: structurally valid with documented semantic uncertainty.** The candidate produces all 518 rows. Strict audit accepts 427 and withholds 91; seven previous blockers now pass the contract-based obligation check. All 1,031 cited steps pass source/time/provenance checks. Semantic certainty remains FAIL, including case_55's uncertainty-only empty plan. Do not interpret row coverage as proof that deletion is complete.
+**B: structurally valid with documented semantic uncertainty.** Candidate rows 518/518; strict accepted 415; uncertain 103. Source/citation/time checks validate emitted claims, not missing obligations. The official strict validator rejects the unproven candidate, including case_55's empty plan.
 
-Public sample: primary 29/32 statuses; strict GhostGuard 24/32; every-row candidate 29/32. All variants have 9/32 exact cases. Exact accuracy has not substantially improved. There are 118 passing test methods. Reports include every sample case and all remaining limitations.
+Public sample: primary statuses 27/32, reviewed 22/32, candidate 29/32; exact candidate 8/32. Precision 67.72%, recall 55.44%. Tests 136 passed, zero failed. Safety corrections reduce exact matches from 9 to 8; no accuracy gain or hidden score is claimed. See `code/docs/SOURCE_REPAIR_REPORT.md` and mandatory `code/evaluation/evaluation_report.md` / `usage_report.md`.
 
-### Setup and execution
+### Run
 
-Python 3.12+ and `pip install -r code/requirements.txt` provide the parser dependency (pypdf). Windows screenshot extraction uses Windows.Media.Ocr with an English language pack and PowerShell; the source-hash cache is excluded from Git and ZIP. A clean isolated virtualenv installed pinned pypdf from official PyPI and passed isolation checks. Full release checks run in that environment; cold OCR was separately exercised. On another OS supply a compatible OCR adapter rather than assuming Windows OCR is available.
-
-From the repository root:
+Python 3.12+, `pip install -r code/requirements.txt`. Windows English OCR uses Windows.Media.Ocr; other platforms need tesseract English. Provide unchanged participant `dataset/` beside `code/`. No sample answers enter inference. Run from repository root:
 
 ```text
 python -m unittest discover -s code/tests -v
@@ -22,76 +20,15 @@ python code/evaluation/generate_reports.py
 python code/release_check.py
 ```
 
-Strict mode intentionally exits with unresolved cases and preserves the previous root output. Candidate mode validates shape before atomic replacement of root output.csv, and writes artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. `validate_candidate.py` separately checks every emitted source/operation and reports semantic certainty. The unchanged strict `validate_output.py` rejects the unproven candidate; its failure is expected and is never reported as a PASS. The release checker runs source validation, two fresh processes, and clean ZIP extraction/execution. It writes artifacts/READINESS.md with separate gates and does not upload anything.
+Strict mode preserves existing output when unresolved. Candidate mode writes all rows atomically and local artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. `--dataset`, `--requests`, `--cache-dir`, `--output`, `--metrics-path`, `--uncertainty-report` support isolated runs. The release checker runs two fresh processes, original-source validation and clean ZIP extraction/execution. Hashes and executed gates are recorded in `code/docs/FINAL_RELEASE_RECORD.md`.
 
-The WindowsApps Python alias on this workstation is unusable. Tested commands use:
+### Optional AI and limits
 
-```powershell
-$py = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-& $py -X utf8 -m unittest discover -s code/tests -v
-& $py -X utf8 code/main.py --mode candidate
-& $py -X utf8 code/validate_candidate.py
-& $py -X utf8 code/evaluation/generate_reports.py
-& $py -X utf8 code/release_check.py
-```
+Final 518-case inference uses zero model calls/tokens/API fee. `--ai` enables bounded ambiguous-intent interpretation only. Configure GHOSTTRACE_AI_PROVIDER=ollama and GHOSTTRACE_AI_MODEL for the installed loopback model, or explicit cloud model/prices plus OPENAI_API_KEY. Bounds remain in `ghosttrace/ai.py`. Credentials come only from environment. AI cannot emit IDs or steps. An exact quote and independent contextual validation are mandatory; the bridge currently supports only two anchored authored paraphrases and otherwise abstains. AI runs write an output.intent.json provenance sidecar; both validators accept `--intent-resolutions PATH` and revalidate it against the original requests. No provenance columns are added to CSV. Live end-to-end and historical experiment usage are separate from final inference usage.
 
-Provide unchanged `dataset/` beside the extracted source. `--dataset PATH`, `--cache-dir PATH`, `--output PATH`, `--metrics-path PATH`, and `--uncertainty-report PATH` support isolated runs. Sample answers are read only by evaluators after inference. `code/evaluation/baseline.md` records this implementation's historical abstentions for report comparisons; it is never an inference input.
+Partial inventories never prove absence. Ownership association never proves sole ownership. Missing control/ownership conditions stay UNKNOWN. GhostGuard independently reparses original obligations and chronology; extraction/policy remain shared. Media panels are bounded where explicit; general column-major OCR row reconstruction remains limited. Missing selectors, future-only captures and case_55 restore permission remain unresolved. Three source-supported extra resources remain despite reference omissions.
 
-### Decision modes and review
-
-Strict audit rejects C required-proof gaps, D contradictions and E unsupported sources. A supported and B supported-but-nonessential missing observations can pass. The official contract applies policy to relevant records; it does not require a profile/tombstone step in every case. A retained journal alone cannot prove deletion; unobserved linked obligations or unidentified account rows in a subject-linked source still block COMPLETE. GhostGuard rereads source bytes and policy-critical fields and checks identity provenance, cutoffs, missing operations and intent. Shared domain parsers limit independence.
-
-Candidate policy is explicitly limited: established violations predict INCOMPLETE; an unknown required state predicts INCOMPLETE without inventing a specific violation; otherwise observed compliant treatments predict COMPLETE under an unverified closed-evidence assumption. All 91 unsupported full-proof status inferences are recorded separately. No resource/evidence ID, restore-risk claim or missing step is fabricated. Case_55 contains no admissible allowed/blocked restoration fact, so it has no source-supported step to emit. Its shape-valid INCOMPLETE empty array does not satisfy strict semantic plan requirements.
-
-### Optional local/cloud intent AI
-
-AI runs only on deterministic intent abstentions and cannot generate IDs, policies or steps. Use `--ai` with explicit configuration. An already installed local model was tested on four authored intent fixtures: `gemma4:e4b` scored 4/4 including abstention versus deterministic 3/4. Initial formatting failures were rejected; explicit JSON-only instructions fixed them. The nine total experimental calls used 1,305 input and 181 output tokens. Zero API fee; local compute costs unmeasured. This small experiment does not show dataset-level gain. Final 518-case runtime uses zero model calls/tokens and $0 estimated API cost.
-
-For an already running Ollama server on loopback:
-
-```powershell
-$env:GHOSTTRACE_AI_PROVIDER = 'ollama'
-$env:GHOSTTRACE_AI_MODEL = 'gemma4:e4b' # Must match your installed model; no download is performed.
-& $py -X utf8 code/main.py --mode candidate --ai
-```
-
-Transport is fixed to http://127.0.0.1:11434/api/chat and never sends cloud authorization headers. Exact quote grounding, strict two-field schema, cache versioning, eight-call/256-output-token/10-second default bounds and one transient retry remain enforced. Set GHOSTTRACE_AI_MAX_CALLS, GHOSTTRACE_AI_MAX_OUTPUT_TOKENS, GHOSTTRACE_AI_TIMEOUT_SECONDS and GHOSTTRACE_AI_RETRIES to reduce bounds. Local API price is zero; electricity/hardware is not estimated.
-
-Cloud OpenAI transport requires OPENAI_API_KEY, GHOSTTRACE_AI_PROVIDER=openai, an explicit GHOSTTRACE_AI_MODEL and verified positive GHOSTTRACE_AI_INPUT_USD_PER_M / GHOSTTRACE_AI_OUTPUT_USD_PER_M prices. The estimated reservation budget defaults to $0.05 (GHOSTTRACE_AI_MAX_COST_USD). The prior HTTP 401 was not retried. No working cloud model is claimed. Read secrets only from the environment; never commit credentials, caches or private traces.
-
-### Artifacts and limits
-
-- output.csv: all 518 best-effort predictions, atomic shape validation passed.
-- artifacts/SUBMISSION_UNCERTAINTY_REPORT.md: every uncertain prediction and omitted obligation.
-- artifacts/READINESS.md and candidate_validation.json: executed independent gates.
-- code/evaluation/evaluation_report.md and usage_report.md: required measured reports.
-- code.zip: source-only package with clean extraction/execution checks; no datasets, caches, credentials, logs or nested archives.
-- log.txt: private append-only transcript, separate from Git and the code ZIP.
-
-Original session traces remain preserved. Follow agent_trace_instructions.md: finish sessions and close the app before copying relevant traces, redact staged copies, then archive separately. Final trace ZIP is NOT VERIFIED while this session is active. No HackerRank upload has occurred.
-
-Final engineering checks classify all 23 sample mismatches in `code/docs/EXACT_CASE_AUDIT.md`: 20 missing account checks, seven retained-record checks and seven analytics checks. No bound admitted fact omitted by inference was found. No new relationship or accuracy gain is claimed since d98e485. Candidate precision remains 114/164 (69.51%) and recall 114/193 (59.07%), with 34 missing and three extra reference resources.
-
-Two new bounded batches of local source-claim review were rejected by validation (1,240 input/1,536 output tokens); deterministic baseline was 6/6. That optional experiment is not enabled for final inference. Total observed local development experiments are 11 calls and 2,545 input/1,717 output tokens, separate from the final run's zeros. No model accuracy score is inferred from invalid replies.
-
-The release checker separates tests, no regression, numerical quality, official contract validity, evidence completeness and packaging. The source ZIP uses fixed metadata, sorted members and LF-normalized source for reproducible bytes. `code/docs/FINAL_RELEASE_RECORD.md` records artifact hashes and is deliberately excluded from the ZIP to avoid a recursive hash. `code/check_tracked_archive.py` verifies the archive against committed source. Do not commit ZIPs or private logs/traces.
-
-For the clean-environment release check actually exercised here:
-
-```powershell
-$base = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-$env:TEMP = Join-Path (Get-Location) 'tmp\install-temp'
-$env:TMP = $env:TEMP
-New-Item -ItemType Directory -Path $env:TEMP -Force | Out-Null
-& $base -m venv tmp/release-venv
-$clean = '.\tmp\release-venv\Scripts\python.exe'
-& $clean -m pip install --index-url https://pypi.org/simple -r code/requirements.txt
-& $clean -X utf8 code/verify_environment.py
-& $clean -X utf8 code/evaluation/generate_reports.py
-& $clean -X utf8 code/release_check.py
-```
-
-Output privacy inspection passed. The conditional public GitHub CSV commit is withheld because contest-specific publication terms remain unverified; the official registration page requires login and browser automation could not verify the active URL. The sanitized release record preserves its hash. Exact trace candidates and post-session archive commands are in `code/docs/TRACE_FINALIZATION.md`.
+Output.csv, code.zip, private log.txt and raw traces remain local. Source ZIP excludes datasets, caches, environments, private traces and nested archives. `FINAL_RELEASE_RECORD.md` is excluded to avoid recursive hashes; `code/check_tracked_archive.py` checks ZIP against committed source. Follow `agent_trace_instructions.md` and `code/docs/TRACE_FINALIZATION.md` after ending sessions/closing the app before final trace archival. No HackerRank upload occurred.
 
 The original official starter instructions follow.
 

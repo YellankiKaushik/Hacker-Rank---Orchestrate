@@ -1,5 +1,6 @@
 """Independent final artifact validator; no inference and no sample-answer access."""
 import argparse
+import json
 from pathlib import Path
 from ghosttrace.loader import Corpus,read_csv
 from ghosttrace.validator import validate_file
@@ -11,8 +12,11 @@ if __name__=='__main__':
     parser.add_argument('--dataset',type=Path,default=root/'dataset')
     parser.add_argument('--requests',type=Path)
     parser.add_argument('--output',type=Path,default=root/'output.csv')
+    parser.add_argument('--intent-resolutions',type=Path,help='Optional intent provenance, independently revalidated')
     args=parser.parse_args()
     corpus=Corpus(args.dataset)
     cases=read_csv(args.requests or args.dataset/'deletion_requests.csv')
-    count=validate_semantic_file(args.output,cases,corpus,args.dataset.parent/'tmp/ocr')
+    from ghosttrace.intent_resolution import IntentResolution
+    resolutions={k:IntentResolution(**v) for k,v in json.loads(args.intent_resolutions.read_text()).items()} if args.intent_resolutions else None
+    count=validate_semantic_file(args.output,cases,corpus,args.dataset.parent/'tmp/ocr',resolutions)
     print(f'Validated {count} sorted cases, schema, source/observation times, source states, identity bindings and policy.')

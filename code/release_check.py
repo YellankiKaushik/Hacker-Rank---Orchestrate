@@ -29,6 +29,18 @@ def command(args,timeout=120,env=None):
     if result.returncode: raise RuntimeError('Verification command failed: '+result.stderr[-2000:])
     return result
 
+
+def transcript_entries_valid(transcript):
+    # User prompts can themselves quote the AGENTS log template. Validate
+    # actual ISO-dated entries and their final metadata, never quoted examples.
+    entries=re.split(r'^## \[\d{4}-\d\d-\d\dT[^\]]+\] ',transcript,flags=re.M)[1:]
+    def valid(entry):
+        metadata=entry.rsplit('\nContext:\n',1)[-1]
+        if '\nUser Prompt ' in metadata: metadata=metadata.split('\nUser Prompt ',1)[0]
+        return (len(re.findall(r'^tool=Codex Desktop\s*$',metadata,re.M))==1 and
+                len(re.findall(r'^model=(?!unknown\b|<)[^\s]+\s*$',metadata,re.M))==1)
+    return bool(entries) and all(valid(entry) for entry in entries)
+
 def main():
     checkpoint=json.loads((ROOT/'tmp/checkpoint.json').read_text())
     result={'run_id':str(uuid.uuid4()),'timestamp_utc':datetime.now(timezone.utc).isoformat(),'gates':{}}
@@ -101,17 +113,16 @@ def main():
         'E_evidence_proven_completeness':gates['SEMANTIC_CERTAINTY'],
         'F_artifact_packaging_readiness':gates['CODE_ZIP']}
     transcript=(ROOT/'log.txt').read_text(encoding='utf-8')
-    entries=transcript.split('## [')[1:]
-    gates['CHAT_TRANSCRIPT']='PASS' if entries and all(len(re.findall(r'^tool=.+$',e,re.M))==1 and len(re.findall(r'^model=.+$',e,re.M))==1 for e in entries) else 'FAIL'
+    gates['CHAT_TRANSCRIPT']='PASS' if transcript_entries_valid(transcript) else 'FAIL'
     gates['AGENT_TRACE']='NOT VERIFIED'
     gates['OVERALL_SUBMISSION_READINESS']='PASS' if all(v=='PASS' for v in gates.values()) else 'FAIL'
     result['submission_ready']=gates['OVERALL_SUBMISSION_READINESS']=='PASS'
     result['candidate_classification']='B: structurally valid with documented semantic uncertainty'
     result['limitations']=[
-        'Strict audit covers 427/518 under the finite-source contract interpretation; 91 predictions are unproven.',
+        f"Strict audit covers {checks['strict_accepted']}/518 under the finite-source interpretation; {len(checks['uncertain_cases'])} predictions are unproven.",
         'Source/policy PASS gates certify emitted claims and known operations, not missing obligations or hidden correctness.',
         'case_55 has an uncertainty-only INCOMPLETE empty plan; source shape passes, strict semantic plan requirements fail.',
-        'All-32 candidate sample accuracy is 29/32 statuses and 9/32 exact; no substantial exact-case improvement.',
+        f"All-32 candidate sample accuracy is {sample['candidate']['status_correct']}/32 statuses and {sample['candidate']['exact_cases']}/32 exact. Safety corrections are retained despite measured regression.",
         'Fresh isolated installation and execution are verified only when CLEAN_DEPENDENCY_INSTALL is PASS; read measured environment evidence.',
         'Conditional public CSV publication remains unverified; a passing privacy check does not verify event-specific sharing terms.',
         'The active session must end and app close before copying, redacting and zipping the original relevant traces.',

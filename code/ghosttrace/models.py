@@ -66,6 +66,17 @@ class Fact:
     def admissible(self, cutoff):
         return self.captured <= cutoff and self.observed <= cutoff
 
+    @property
+    def copy_role(self):
+        """Typed physical scope, without interpreting incidental text as topology."""
+        roles={'customer_profiles_failover_replica':'REPLICA','customer_data_regional_replica':'REPLICA',
+               'customer_data_reporting_replica':'REPLICA','customer_data_failover_replica':'REPLICA',
+               'customer_data_read_replica':'REPLICA','customer_data_replica_ap_south':'REPLICA',
+               'customer_data_replica_eu_west':'REPLICA','customer_data_primary':'PRIMARY',
+               'replica':'REPLICA','customer_profiles_primary':'PRIMARY','search_documents_primary':'PRIMARY','primary':'PRIMARY'}
+        declared=self.data.get('copy_role')
+        return declared if declared in ('PRIMARY','REPLICA') else roles.get(self.scope,'UNKNOWN')
+
     @cached_property
     def binding_tokens(self):
         # Facts are treated as immutable; source changes require a new hash-checked parse.
@@ -82,3 +93,4 @@ class Audit:
     issues: list[str] = field(default_factory=list)
     bindings: dict = field(default_factory=dict)
     coverage_proofs: list = field(default_factory=list)
+    intent_resolution: object = None

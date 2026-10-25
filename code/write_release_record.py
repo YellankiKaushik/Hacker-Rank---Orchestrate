@@ -28,7 +28,14 @@ def main():
         outgoing=sum(v['usage']['output_tokens'] for v in runs)
         experiment_text=(f"- Local intent experiment: {intent['requested_model']}, {calls} calls, {incoming} input/{outgoing} output tokens. Final authored-fixture score {intent['model_correct']}/4 including abstention versus {intent['baseline_correct']}/4 deterministic; no dataset gain claimed.\n"
             f"- New source-review experiment: {review['requested_model']}, {review['calls']} calls, {review['input_tokens']} input/{review['output_tokens']} output tokens. Accepted batches {sum(a['accepted'] for a in review['attempts'])}/2; deterministic baseline {review['baseline_correct']}/6. Valid-output reproducibility was not established; failed replies never enter inference.\n"
-            f"- Combined observed development experiments: {calls+review['calls']} calls, {incoming+review['input_tokens']} input/{outgoing+review['output_tokens']} output tokens, zero API fee. Local hardware/electricity and Codex engineering cost are unmeasured. No rejected cloud credential was retried.\n")
+            f"- Combined prior development experiments: {calls+review['calls']} calls, {incoming+review['input_tokens']} input/{outgoing+review['output_tokens']} output tokens, zero API fee. Local hardware/electricity and Codex engineering cost are unmeasured. No rejected cloud credential was retried.\n")
+    pipeline_path=ROOT/'artifacts/intent_pipeline_evaluation.json'
+    if pipeline_path.exists():
+        pipeline=json.loads(pipeline_path.read_text()); u=pipeline['usage']
+        experiment_text+=(f"- Source-repair end-to-end intent experiment: `{pipeline['requested_model']}`, {u['successful_calls']} actual successful calls, "
+            f"{u['input_tokens']} input/{u['output_tokens']} output tokens, API USD {u['estimated_cost_usd']:.2f}; accepted {pipeline['accepted']}/2 authored fixtures "
+            "through source review, export and fresh validation. Initial sandbox socket denials are transport failures with no model usage returned. "
+            "These measurements do not enter final inference totals or establish dataset accuracy gain.\n")
     record=f'''# Final release record — GhostTrace Guard {__version__}
 
 Classification: **B — structurally valid with documented semantic uncertainty**. Fully evidence-proven submission readiness: **FAIL**. No upload, AI interview, hidden score or leaderboard position is claimed.
@@ -49,8 +56,8 @@ Classification: **B — structurally valid with documented semantic uncertainty*
 The final measured report/inference command from the repository root was:
 
 ```powershell
-& '.\\tmp\\release-venv\\Scripts\\python.exe' -X utf8 code/evaluation/generate_reports.py
-& '.\\tmp\\release-venv\\Scripts\\python.exe' -X utf8 code/release_check.py
+& '.\\tmp\\repair-venv\\Scripts\\python.exe' -X utf8 code/evaluation/generate_reports.py
+& '.\\tmp\\repair-venv\\Scripts\\python.exe' -X utf8 code/release_check.py
 ```
 
 The report command generates all 518 root predictions and both mandatory reports. Equivalent direct CLI `python code/main.py --mode candidate` was exercised in two fresh processes and clean extraction. Default strict mode remains separate and preserves prior output when proof is missing.
@@ -62,7 +69,7 @@ The report command generates all 518 root predictions and both mandatory reports
 
 The ZIP has {release['package']['members']} members. Fixed archive timestamp/permissions, sorted members and normalized LF source text make bytes independent of checkout mtimes/line endings. A second archive build has the identical SHA-256. Clean extraction runs tests, public samples, the expected strict block, every-row candidate generation and original-source validation. This hash-bearing FINAL_RELEASE_RECORD.md is excluded from code.zip to avoid a recursive hash dependency. The archive itself is ignored and not committed.
 
-## Actual quality (previous d98e485 versus current)
+## Actual quality (preserved 5b9a098 baseline versus repaired current)
 
 | Metric | Previous | Current |
 |---|---|---|
@@ -77,7 +84,7 @@ The ZIP has {release['package']['members']} members. Fixed archive timestamp/per
 | Candidate rows | 518/518 | {release['candidate_rows']}/518 |
 | Uncertain predictions | 91 | {release['uncertain_predictions']} |
 
-No accuracy improvement or new source relationship is claimed since d98e485. Every missing reference resource was checked against admitted parsed facts, raw source/OCR mentions, cutoffs and actual binding paths. No bound admissible fact was found omitted by inference. The common gaps are anonymous readbacks without selectors, missing state observations and later-only captures. The three extras have source-backed relationships and remain. Evaluation-only expected IDs never enter production inference.
+Safety repairs from baseline 5b9a098 reduce sample exact matches from 9/32 to 8/32 and strict acceptance from 427 to 415; no accuracy gain or new subject/resource link is claimed. Conditional attachment deletion is now withheld without exclusivity proof. Every missing reference resource is checked against admitted facts, raw source/OCR mentions, cutoffs and binding paths. The common gaps are anonymous readbacks without selectors, missing state observations and later-only captures. The three extras have source-backed relationships and remain. Evaluation-only expected IDs never enter production inference.
 
 ## Tests, isolation and usage
 
@@ -94,7 +101,7 @@ No accuracy improvement or new source relationship is claimed since d98e485. Eve
 '''
     record+=''.join(f'| {k} | {v} |\n' for k,v in release['gates'].items())
     record+=f'''
-Regression gates compare the preceding checkpoint. Numerical sample quality is shown above, independently of tests and packaging. 9/32 exact is not evidence of competitive quality. Official contract validity and semantic certainty fail despite valid CSV shape.
+Regression gates compare the preceding checkpoint. Numerical sample quality is shown above, independently of tests and packaging. {sample['exact_cases']}/32 exact does not establish competitive quality; the exact no-regression gate is FAIL. Official contract validity and semantic certainty fail despite valid CSV shape.
 
 ## GitHub publication decision
 
@@ -111,11 +118,11 @@ $base = Join-Path $env:USERPROFILE '.cache\\codex-runtimes\\codex-primary-runtim
 $env:TEMP = Join-Path (Get-Location) 'tmp\\install-temp'
 $env:TMP = $env:TEMP
 New-Item -ItemType Directory -Path $env:TEMP -Force | Out-Null
-& $base -m venv tmp/release-venv
-& '.\\tmp\\release-venv\\Scripts\\python.exe' -m pip install --index-url https://pypi.org/simple -r code/requirements.txt
-& '.\\tmp\\release-venv\\Scripts\\python.exe' -X utf8 code/verify_environment.py
-& '.\\tmp\\release-venv\\Scripts\\python.exe' -X utf8 code/evaluation/generate_reports.py
-& '.\\tmp\\release-venv\\Scripts\\python.exe' -X utf8 code/release_check.py
+& $base -m venv tmp/repair-venv
+& '.\\tmp\\repair-venv\\Scripts\\python.exe' -m pip install --index-url https://pypi.org/simple -r code/requirements.txt
+& '.\\tmp\\repair-venv\\Scripts\\python.exe' -X utf8 code/verify_environment.py
+& '.\\tmp\\repair-venv\\Scripts\\python.exe' -X utf8 code/evaluation/generate_reports.py
+& '.\\tmp\\repair-venv\\Scripts\\python.exe' -X utf8 code/release_check.py
 ```
 
 For a clean clone, provide the unchanged participant dataset beside code/. Windows screenshot OCR requires the English language pack. Raw source-hashed OCR caches are excluded from source distribution. Reports are in code/evaluation/; uncertainty is in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md; executed gates in artifacts/READINESS.md. log.txt stays a separate append-only private transcript.
@@ -124,7 +131,7 @@ Trace ZIP: **NOT VERIFIED** while the session remains active. Follow code/docs/T
 
 ## Remaining semantic failures
 
-Ninety decisions still lack required coverage/link proof; case_55 lacks target restore permission at 2026-04-30T11:00:00Z. Archive existence and association do not establish restoration access. No restore-risk or blocked-restoration step is fabricated. Its empty INCOMPLETE plan is structurally valid but does not fulfill semantic plan requirements. This is an available candidate for participant review, not a fully validated official-contract submission. No HackerRank upload occurred.
+Required coverage/link and attachment ownership proof remain unresolved; see the per-case report. case_55 lacks target restore permission at 2026-04-30T11:00:00Z. Archive existence and association do not establish restoration access. No restore-risk or blocked-restoration step is fabricated. Its empty INCOMPLETE plan is structurally valid but does not fulfill semantic plan requirements. This is an available candidate for participant review, not a fully validated official-contract submission. No HackerRank upload occurred.
 '''
     path=ROOT/'code/docs/FINAL_RELEASE_RECORD.md'; path.write_text(record,encoding='utf-8')
     print(json.dumps({'record':str(path.relative_to(ROOT)),'implementation_commit':commit,

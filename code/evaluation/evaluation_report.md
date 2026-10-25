@@ -1,6 +1,6 @@
 # Measured two-mode evaluation
 
-Generated 2026-10-24T19:27:22.010787+00:00. **B: structurally valid candidate with documented semantic uncertainty.** There is no hidden-answer score. Full candidate coverage is 518/518; strict evidence-proven coverage under the implemented finite-source review is 427/518. This is not exhaustive knowledge of every possible copy.
+Generated 2026-10-25T01:21:20.924479+00:00. **B: structurally valid candidate with documented semantic uncertainty.** There is no hidden-answer score. Full candidate coverage is 518/518; strict evidence-proven coverage under the implemented finite-source review is 415/518. This is not exhaustive knowledge of every possible copy.
 
 ## Public sample: all 32 cases
 
@@ -9,24 +9,24 @@ Generated 2026-10-24T19:27:22.010787+00:00. **B: structurally valid candidate wi
 | Previous primary, 2ada359 | 29/32 | 9/32 | 3 withheld |
 | Previous strict review, 2ada359 | 24/32 | 9/32 | 8 withheld |
 | Previous complete candidate, d98e485 | 29/32 | 9/32 | 8 uncertain |
-| Current primary | 29/32 | 9/32 | 3 withheld |
-| Current strict review | 24/32 | 9/32 | 8 withheld |
-| Current every-row candidate | 29/32 | 9/32 | 8 uncertain, none withheld |
+| Current primary | 27/32 | 8/32 | 5 withheld |
+| Current strict review | 22/32 | 8/32 | 10 withheld |
+| Current every-row candidate | 29/32 | 8/32 | 10 uncertain, none withheld |
 
 Every-row candidate metrics include all 32 generated predictions. Exact-case accuracy has not substantially improved. All 518 evaluation predictions exist, but their accuracy is NOT VERIFIED because no participant reference answers are available. References are loaded by this evaluator only after inference; no production module reads sample_output.csv.
 
 | Candidate metric | Measurement |
 |---|---|
 | Status accuracy | 29/32 (90.62%) |
-| Exact case accuracy | 9/32 (28.12%) |
-| Sequence accuracy | 9/32 (28.12%) |
-| Position-aligned field accuracy | 957/1379 (69.40%) |
-| Exact seven-field step precision | 114/164 (69.51%) |
-| Exact seven-field step recall | 114/193 (59.07%) |
-| Reference citation agreement | 59/60 (98.33%) |
+| Exact case accuracy | 8/32 (25.00%) |
+| Sequence accuracy | 8/32 (25.00%) |
+| Position-aligned field accuracy | 917/1365 (67.18%) |
+| Exact seven-field step precision | 107/158 (67.72%) |
+| Exact seven-field step recall | 107/193 (55.44%) |
+| Reference citation agreement | 57/58 (98.28%) |
 | False COMPLETE / false INCOMPLETE | 0 / 3 |
-| Missing / extra reference resources | 34 / 3 |
-| Missing / extra scope operations | 34 / 5 |
+| Missing / extra reference resources | 36 / 3 |
+| Missing / extra scope operations | 40 / 5 |
 
 Field accuracy pads both arrays to the larger length, comparing all seven fields per position. Step precision/recall is multiset intersection including numbering and citations. Sequence accuracy compares ordered phase/operation/system/resource. Reference citation agreement is distinct from actual source support.
 
@@ -36,23 +36,23 @@ The official contract requires appropriate treatment of every relevant copy, req
 
 A retained journal alone cannot establish account deletion. A known linked record without a readback, or an unidentified account row in the admitted subject-linked source, remains C. A substantive compliant secondary treatment can qualify B when every grounded obligation is covered and no such ambiguity remains. All previous 97 missing-profile cases were re-evaluated: **7 now qualify B, 90 remain C**. Recovered cases: case_112, case_155, case_204, case_213, case_297, case_308, case_57. No new identity assignment was fabricated.
 
-GhostGuard does not improve measured sample status accuracy: 29/32 primary versus 24/32 reviewed. Five withheld primary statuses match references while necessary linkage/scope proof is absent. Source rereading independently checks original bytes and hashes and catches injected source/citation/state/intent/operation errors in tests. Shared domain adapters/policy limit independence; there is no LLM reviewer or hidden-answer oracle.
+GhostGuard does not improve measured sample status accuracy: 27/32 primary versus 22/32 reviewed. Additional withheld statuses include conditional ownership proof gaps; reference agreement alone cannot establish authorization to delete. Source rereading independently checks original bytes and hashes and catches injected source/citation/state/intent/operation errors in tests. Shared domain adapters/policy limit independence; there is no LLM reviewer or hidden-answer oracle.
 
 ## Full run: coverage versus certainty
 
-- Strict accepted: 427/518; unresolved: 91.
+- Strict accepted: 415/518; unresolved: 103.
 - Candidate: 518/518; statuses `{'INCOMPLETE': 355, 'COMPLETE': 153, 'NOT_APPLICABLE': 10}`.
-- Uncertain predictions: 91; unsupported full-proof status inferences: 91; fabricated references: 0.
-- Source-backed cited steps: 1031/1031. Future work uses empty evidence IDs.
+- Uncertain predictions: 103; unsupported full-proof status inferences: 103; fabricated references: 0.
+- Source-backed cited steps: 1019/1019. Future work uses empty evidence IDs.
 - Structure, emitted citation/time/provenance/policy-operation gates PASS. Semantic certainty FAIL.
-- Output SHA-256 `edc5a4ea5e0ea8376a6236524fb9eb1049657767c61cb72883fc5fef787ff7f3`; warm-cache seconds 7.6276.
+- Output SHA-256 `b4301131db2c2f874feadff55dcc38fea0b595d9b1430d7a8f248ed63b57e283`; warm-cache seconds 7.9360.
 - Targeted rereads 33, source-view cache hits 58; at most one retry/four source files per challenged case.
 
 Unknown required state predicts INCOMPLETE without inventing a particular violation. Observed compliant states with unproven scope predict COMPLETE under an explicitly unverified closed-evidence assumption. Every such inference appears in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. case_55 has no source-supported current-state check: INCOMPLETE with an empty array satisfies CSV/JSON shape but fails strict semantic plan completeness. The existing strict validator remains unchanged and rejects the unproven candidate.
 
 ## Regression coverage and additional participant cases
 
-118 unit/synthetic integration test methods pass. Representative independently authored cases:
+136 unit/synthetic integration test methods pass. Representative independently authored cases:
 
 1. Compliant secondary treatment passes B without an unrelated profile; retention-only proof stays C.
 2. An unobserved linked profile or unidentified account readback stays C; no batch-order assignment is used.
@@ -72,10 +72,11 @@ Unknown required state predicts INCOMPLETE without inventing a particular violat
 | case_02 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_002 | none |
 | case_03 | COMPLETE | VERIFY_RECORD_ANONYMIZED:analytics_9406 | none |
 | case_04 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_004, VERIFY_RECORD_ANONYMIZED:analytics_901 | none |
-| case_07 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_007 | DELETE_RECORD:object_19, REPORT_REMAINING_RECORD:object_19, VERIFY_RECORD_ABSENT:object_19 |
+| case_07 | INCOMPLETE | DELETE_RECORD:support_001, REPORT_REMAINING_RECORD:support_001, VERIFY_RECORD_ABSENT:account_007, VERIFY_RECORD_ABSENT:support_001 | DELETE_RECORD:object_19, REPORT_REMAINING_RECORD:object_19, VERIFY_RECORD_ABSENT:object_19 |
 | case_08 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_008 | none |
 | case_09 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_3960, VERIFY_RECORD_PRESENT:audit_record_4902 | none |
 | case_10 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_010 | none |
+| case_13 | INCOMPLETE | DELETE_RECORD:support_4218, REPORT_REMAINING_RECORD:support_4218, VERIFY_RECORD_ABSENT:support_4218 | none |
 | case_17 | INCOMPLETE | none | VERIFY_RECORD_ABSENT:account_6523, VERIFY_RECORD_REDACTED:tombstone_17 |
 | case_18 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_5521, VERIFY_RECORD_PRESENT:audit_record_6645 | none |
 | case_20 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_5037, VERIFY_RECORD_PRESENT:audit_record_5569 | none |
@@ -92,7 +93,7 @@ Unknown required state predicts INCOMPLETE without inventing a particular violat
 | case_31 | COMPLETE | VERIFY_RECORD_ABSENT:account_4857 | none |
 | case_32 | INCOMPLETE | VERIFY_RECORD_ABSENT:account_8858 | none |
 
-Missing account/anonymous analytics verifications lack admitted subject selectors, or occur only in post-cutoff files. Several expected security-record checks are available only in excluded later captures. Assigning anonymous rows by position, event proximity or numeric suffix would fabricate identity relationships. These operations remain omitted and documented. The attachment discrepancy was checked: activity_4007 explicitly associates object_19 with the subject and evidence_46 establishes its storage. It remains despite its omission from the public reference. Source-backed account/tombstone extras likewise remain. Future verification covers each known remediated record/process; active flows and restores require explicit configuration/readback evidence. No golden case/resource ID or expected sequence was added to production logic. No substantial exact-case gain is claimed.
+Missing account/anonymous analytics verifications lack admitted subject selectors, or occur only in post-cutoff files. Attachment deletions additionally require sole-ownership proof; association alone is insufficient. Several expected security-record checks are available only in excluded later captures. Assigning anonymous rows by position, event proximity or numeric suffix would fabricate identity relationships. These operations remain omitted and documented. The attachment discrepancy was checked: activity_4007 explicitly associates object_19 with the subject and evidence_46 establishes its storage. It remains despite its omission from the public reference. Source-backed account/tombstone extras likewise remain. Future verification covers each known remediated record/process; active flows and restores require explicit configuration/readback evidence. No golden case/resource ID or expected sequence was added to production logic. No substantial exact-case gain is claimed.
 
 ## Actual bounded local AI
 
@@ -100,10 +101,14 @@ Installed model `gemma4:e4b`: initial four replies failed strict JSON checks; on
 
 ## Final engineering root-cause audit
 
-All 23 mismatches were classified against original source contents and exact cutoffs. Missing operations: `{'1_ACCOUNT_ABSENCE': 20, '3_ANALYTICS_ANONYMIZATION': 7, '5_EXTRA_RESOURCE': 3, '2_RETAINED_VERIFICATION': 7}`. Causes: `{'NO_STATE_OBSERVATION': 16, 'MISSING_SUBJECT_SELECTOR': 12, 'EXPLICIT_ADMITTED_RELATIONSHIP_DIFFERS_FROM_REFERENCE': 3, 'ONLY_POST_CUTOFF_OBSERVATIONS': 6}`. Bound admissible facts omitted by inference: 0. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No additional source relationship was recovered since d98e485, and output accuracy did not change. The remaining uncertainty groups are `{'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'UNKNOWN_REQUIRED_RESOURCE_STATE': 1}`; future-only sources are diagnostic only, never inference inputs.
+All 24 mismatches were classified against original source contents and exact cutoffs. Missing operations: `{'1_ACCOUNT_ABSENCE': 20, '3_ANALYTICS_ANONYMIZATION': 7, '8_POLICY_ACTION': 6, '5_EXTRA_RESOURCE': 3, '2_RETAINED_VERIFICATION': 7}`. Causes: `{'NO_STATE_OBSERVATION': 16, 'MISSING_SUBJECT_SELECTOR': 12, 'MISSING_CONDITIONAL_POLICY_PROOF': 6, 'EXPLICIT_ADMITTED_RELATIONSHIP_DIFFERS_FROM_REFERENCE': 3, 'ONLY_POST_CUTOFF_OBSERVATIONS': 6}`. Bound admissible facts omitted by inference: 0. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No new subject/resource relationship was recovered. Source-verified safety corrections reduce exact sample accuracy from 9/32 to 8/32 by withholding attachment actions without sole-ownership proof; no gain is claimed. The remaining uncertainty groups are `{'ROOT_BINDING_ONLY_IN_EXCLUDED_FUTURE_CAPTURE': 24, 'MISSING_SUBJECT_TO_RESOURCE_LINK': 29, 'NO_ROOT_STATE_IN_LINKED_ADMISSIBLE_SOURCES': 37, 'UNKNOWN_REQUIRED_RESOURCE_STATE_OR_POLICY': 13}`; future-only sources are diagnostic only, never inference inputs.
 
-Previous d98e485 candidate precision 114/164 (69.51%), recall 114/193 (59.07%), missing resources 34, extra 3. Current precision 114/164 (69.51%), recall 114/193 (59.07%), missing 34, extra 3. No improvement is claimed.
+Previous d98e485 candidate precision 114/164 (69.51%), recall 114/193 (59.07%), missing resources 34, extra 3. Current precision 107/158 (67.72%), recall 107/193 (55.44%), missing 36, extra 3. No improvement is claimed.
 
 ## New source-grounded AI review experiment
 
 Two bounded batches evaluated six authored source claims: deletion-success versus readback, conflicting replica, archive existence versus permission, blocked permission, and compliant tombstone. Deterministic baseline: 6/6. Accepted model batches: 0/2; both replies were rejected with ValueError at the configured 768-output-token bound, so no model accuracy score is asserted. Uncached response reproducibility: False. Durations: [23.22, 16.75] seconds versus 0.000558 seconds deterministic. Usage: 2 actual calls, 1240 input/1536 output tokens. Fine-grained rejection subcause was not retained in that measured run; future runs now record it. No improvement was demonstrated, so this capability is evaluation-only and disabled for final predictions. No rejected verdict became an output fact.
+
+## Source repair checkpoint
+
+See SOURCE_REPAIR_REPORT.md for exact defects, the preserved baseline and measured safety-driven regression. Missing attachment exclusivity is an unresolved policy condition; it does not authorize DELETE. General media row geometry and broader ambiguous intent remain limited.

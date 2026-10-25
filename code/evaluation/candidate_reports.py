@@ -42,10 +42,10 @@ def main():
     remaining={u['case_id'] for u in full['unresolved']}
     recovered=sorted(old-remaining)
     auditor=GapAuditor(corpus,index)
-    gaps={a.case['case_id']:auditor.inspect(a.case) for a in audits if a.case['case_id'] in old}
+    gaps={a.case['case_id']:auditor.inspect(a.case) for a in audits if a.case['case_id'] in old|remaining}
     mismatch=mismatch_audit(ROOT,corpus,index,c)
     diagnostic={d['case_id']:d for d in full['case_diagnostics']}
-    remaining_groups=Counter('UNKNOWN_REQUIRED_RESOURCE_STATE' if 'Unresolved state:' in diagnostic[k].get('final_error','')
+    remaining_groups=Counter('UNKNOWN_REQUIRED_RESOURCE_STATE_OR_POLICY' if 'Unresolved state:' in diagnostic[k].get('final_error','')
                             else gaps[k]['reason'] for k in remaining)
     local_path=ROOT/'artifacts/local_ai_evaluation.json'
     local=json.loads(local_path.read_text()) if local_path.exists() else None
@@ -91,7 +91,7 @@ The official contract requires appropriate treatment of every relevant copy, req
 
 A retained journal alone cannot establish account deletion. A known linked record without a readback, or an unidentified account row in the admitted subject-linked source, remains C. A substantive compliant secondary treatment can qualify B when every grounded obligation is covered and no such ambiguity remains. All previous 97 missing-profile cases were re-evaluated: **{len(recovered)} now qualify B, 90 remain C**. Recovered cases: {', '.join(recovered)}. No new identity assignment was fabricated.
 
-GhostGuard does not improve measured sample status accuracy: {p['status_correct']}/32 primary versus {s['status_correct']}/32 reviewed. Five withheld primary statuses match references while necessary linkage/scope proof is absent. Source rereading independently checks original bytes and hashes and catches injected source/citation/state/intent/operation errors in tests. Shared domain adapters/policy limit independence; there is no LLM reviewer or hidden-answer oracle.
+GhostGuard does not improve measured sample status accuracy: {p['status_correct']}/32 primary versus {s['status_correct']}/32 reviewed. Additional withheld statuses include conditional ownership proof gaps; reference agreement alone cannot establish authorization to delete. Source rereading independently checks original bytes and hashes and catches injected source/citation/state/intent/operation errors in tests. Shared domain adapters/policy limit independence; there is no LLM reviewer or hidden-answer oracle.
 
 ## Full run: coverage versus certainty
 
@@ -129,11 +129,11 @@ Unknown required state predicts INCOMPLETE without inventing a particular violat
         extra=', '.join(sorted({f'{k[1]}:{k[3]}' for k in f['extra_operations']})) or 'none'
         report+=f"| {f['case_id']} | {f['predicted_status']} | {missing} | {extra} |\n"
     report+='''
-Missing account/anonymous analytics verifications lack admitted subject selectors, or occur only in post-cutoff files. Several expected security-record checks are available only in excluded later captures. Assigning anonymous rows by position, event proximity or numeric suffix would fabricate identity relationships. These operations remain omitted and documented. The attachment discrepancy was checked: activity_4007 explicitly associates object_19 with the subject and evidence_46 establishes its storage. It remains despite its omission from the public reference. Source-backed account/tombstone extras likewise remain. Future verification covers each known remediated record/process; active flows and restores require explicit configuration/readback evidence. No golden case/resource ID or expected sequence was added to production logic. No substantial exact-case gain is claimed.
+Missing account/anonymous analytics verifications lack admitted subject selectors, or occur only in post-cutoff files. Attachment deletions additionally require sole-ownership proof; association alone is insufficient. Several expected security-record checks are available only in excluded later captures. Assigning anonymous rows by position, event proximity or numeric suffix would fabricate identity relationships. These operations remain omitted and documented. The attachment discrepancy was checked: activity_4007 explicitly associates object_19 with the subject and evidence_46 establishes its storage. It remains despite its omission from the public reference. Source-backed account/tombstone extras likewise remain. Future verification covers each known remediated record/process; active flows and restores require explicit configuration/readback evidence. No golden case/resource ID or expected sequence was added to production logic. No substantial exact-case gain is claimed.
 '''
     if local:
         report+=f"\n## Actual bounded local AI\n\nInstalled model `{local['requested_model']}`: initial four replies failed strict JSON checks; one diagnostic identified formatting failure. An explicit JSON-only instruction repaired it. Final authored fixture score {local['model_correct']}/4 including one abstention versus deterministic {local['baseline_correct']}/4. This tiny intent benchmark does not demonstrate dataset gain. All experimental calls including rejected replies: {local_totals['attempts']}, input tokens {local_totals['input_tokens']}, output tokens {local_totals['output_tokens']}. No API fee; local compute cost unmeasured. Rejected cloud credentials were not retried. Final dataset runtime uses zero model calls.\n"
-    report+=f"\n## Final engineering root-cause audit\n\nAll {mismatch['case_mismatches']} mismatches were classified against original source contents and exact cutoffs. Missing operations: `{mismatch['taxonomy']}`. Causes: `{mismatch['causes']}`. Bound admissible facts omitted by inference: {mismatch['repairable_engine_omissions']}. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No additional source relationship was recovered since d98e485, and output accuracy did not change. The remaining uncertainty groups are `{dict(remaining_groups)}`; future-only sources are diagnostic only, never inference inputs.\n\nPrevious d98e485 candidate precision 114/164 (69.51%), recall 114/193 (59.07%), missing resources 34, extra 3. Current precision {ratio(c['step_matches'],c['predicted_steps'])}, recall {ratio(c['step_matches'],c['reference_steps'])}, missing {c['missing_records']}, extra {c['extra_records']}. No improvement is claimed.\n"
+    report+=f"\n## Final engineering root-cause audit\n\nAll {mismatch['case_mismatches']} mismatches were classified against original source contents and exact cutoffs. Missing operations: `{mismatch['taxonomy']}`. Causes: `{mismatch['causes']}`. Bound admissible facts omitted by inference: {mismatch['repairable_engine_omissions']}. Full per-resource source explanation is in code/docs/EXACT_CASE_AUDIT.md. No new subject/resource relationship was recovered. Source-verified safety corrections reduce exact sample accuracy from 9/32 to 8/32 by withholding attachment actions without sole-ownership proof; no gain is claimed. The remaining uncertainty groups are `{dict(remaining_groups)}`; future-only sources are diagnostic only, never inference inputs.\n\nPrevious d98e485 candidate precision 114/164 (69.51%), recall 114/193 (59.07%), missing resources 34, extra 3. Current precision {ratio(c['step_matches'],c['predicted_steps'])}, recall {ratio(c['step_matches'],c['reference_steps'])}, missing {c['missing_records']}, extra {c['extra_records']}. No improvement is claimed.\n"
     if review_ai:
         report+=f"\n## New source-grounded AI review experiment\n\nTwo bounded batches evaluated six authored source claims: deletion-success versus readback, conflicting replica, archive existence versus permission, blocked permission, and compliant tombstone. Deterministic baseline: {review_ai['baseline_correct']}/6. Accepted model batches: {sum(a['accepted'] for a in review_ai['attempts'])}/2; both replies were rejected with ValueError at the configured 768-output-token bound, so no model accuracy score is asserted. Uncached response reproducibility: {review_ai['uncached_response_reproducible']}. Durations: {[round(a['seconds'],3) for a in review_ai['attempts']]} seconds versus {review_ai['baseline_seconds']:.6f} seconds deterministic. Usage: {review_ai['calls']} actual calls, {review_ai['input_tokens']} input/{review_ai['output_tokens']} output tokens. Fine-grained rejection subcause was not retained in that measured run; future runs now record it. No improvement was demonstrated, so this capability is evaluation-only and disabled for final predictions. No rejected verdict became an output fact.\n"
     (reports/'evaluation_report.md').write_text(report,encoding='utf-8')
@@ -158,6 +158,18 @@ Average tokens per request: 0/518 = 0. Average API cost per request: $0/518 = $0
     if review_ai:
         usage+=f"\nAdditional source-review experiment on gemma4:e4b: {review_ai['calls']} calls, {review_ai['input_tokens']} input + {review_ai['output_tokens']} output tokens, zero API fee. Both bounded batches failed validation and were excluded from inference. Combined observed development experiments: {local_totals['attempts']+review_ai['calls']} calls, {local_totals['input_tokens']+review_ai['input_tokens']} input + {local_totals['output_tokens']+review_ai['output_tokens']} output tokens. These are separate from the final run's zeros. Local hardware/electricity and Codex engineering cost remain unmeasured.\n"
     (reports/'usage_report.md').write_text(usage,encoding='utf-8')
+    pipeline_path=ROOT/'artifacts/intent_pipeline_evaluation.json'
+    if pipeline_path.exists():
+        pipeline=json.loads(pipeline_path.read_text()); measured=pipeline['usage']
+        extra=(f"\n## Source-repair intent integration experiment\n\nOllama loopback `{pipeline['requested_model']}`: "
+            f"{measured['attempts']} actual calls, {measured['input_tokens']} input + {measured['output_tokens']} output = "
+            f"{measured['input_tokens']+measured['output_tokens']} tokens; API fee ${measured['estimated_cost_usd']:.2f}. "
+            f"End-to-end accepted {pipeline['accepted']}/2 authored fixtures (one deletion, one temporary suspension), "
+            "through Engine, Guard, atomic CSV writing and fresh source validation. Both deterministic baselines abstain. "
+            "No dataset accuracy improvement is inferred. Initial sandbox socket denials made two transport attempts, "
+            "zero successful model calls and no returned token usage; they are recorded separately, not as zero-token completions. "
+            "The final 518-case run above still uses zero model calls.\n")
+        with (reports/'usage_report.md').open('a',encoding='utf-8') as stream: stream.write(extra)
     recovery=f'''# Contract and recovery audit
 
 Generated {now}. Blanket profile proof replaced by relevant obligations; A/B accept, C/D/E block. Previous 97-case cluster re-evaluated: {len(recovered)} accepted B, 90 unresolved C. case_55 separately remains unknown. Strict coverage {full['strict_resolved']}/518; candidate 518/518 with {len(full['uncertain_cases'])} unproven predictions.
@@ -180,7 +192,7 @@ Cutoff 2026-04-30T11:00:00Z. evidence_32 backup_restore_console_20260429.png pro
 
 Anonymous 404s/anonymized rows establish state for a resource without identifying its subject. A retained journal in the same batch cannot assign that row to a person. Future-only sources are diagnostic explanations only; no future binding selects a candidate status/resource/citation/operation. Every remaining inferred prediction is listed separately in SUBMISSION_UNCERTAINTY_REPORT.md.
 '''
-    recovery+=f"\n## d98e485 continuation\n\nNew relationships recovered: 0. Remaining group census: `{dict(remaining_groups)}`. Raw admitted source/OCR mentions and all missing reference keys were checked in evaluator-only analysis; no bound admitted fact was omitted by the engine. Explicit identity-bearing non-catalog activity matches for the samples: {len(mismatch['explicit_non_catalog_activity_links'])}. More exact matches would require selectors or cutoff-admissible state observations that have not been verified. No repeat blind scan or guessed association is used.\n"
+    recovery+=f"\n## d98e485 continuation\n\nNew relationships recovered: 0. Remaining group census: `{dict(remaining_groups)}`. Raw admitted source/OCR mentions and all missing reference keys were checked in evaluator-only analysis; bound attachment observations with missing conditional-policy proof are withheld; the mismatch audit distinguishes them from repairable engine omissions. Explicit identity-bearing non-catalog activity matches for the samples: {len(mismatch['explicit_non_catalog_activity_links'])}. More exact matches would require selectors or cutoff-admissible state observations that have not been verified. No repeat blind scan or guessed association is used.\n"
     (docs/'RECOVERY_AUDIT.md').write_text(recovery,encoding='utf-8')
     issues=f'''# Unresolved evidence and execution issues
 
@@ -213,3 +225,5 @@ Updated {now}. Strict unresolved {len(full['unresolved'])}; candidate 518 rows; 
         'candidate_rows':len(audits),'candidate_uncertain':len(full['uncertain_cases']),
         'output_sha256':full['output_sha256'],'recovered_cases':recovered,'local_ai_totals':local_totals}
     save(ROOT/'tmp/checkpoint.json',checkpoint); print(json.dumps(checkpoint,indent=2))
+    from evaluation.repair_report import generate as repair_report
+    repair_report(ROOT,full,{'primary':p,'strict':s,'candidate':c,'tests':count},index)

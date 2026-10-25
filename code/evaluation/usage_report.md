@@ -1,6 +1,6 @@
 # Final full-candidate runtime usage
 
-Generated 2026-10-24T19:27:22.010787+00:00. Run generated all 518 of 518 predictions; output SHA-256 `edc5a4ea5e0ea8376a6236524fb9eb1049657767c61cb72883fc5fef787ff7f3`. Strict accepted 427, uncertain 91. Warm-cache runtime 7.6276 seconds.
+Generated 2026-10-25T01:21:20.924479+00:00. Run generated all 518 of 518 predictions; output SHA-256 `b4301131db2c2f874feadff55dcc38fea0b595d9b1430d7a8f248ed63b57e283`. Strict accepted 415, uncertain 103. Warm-cache runtime 7.9360 seconds.
 
 | Final runtime provider/model | Calls | Input tokens | Output tokens | Total tokens | Estimated API USD |
 |---|---:|---:|---:|---:|---:|
@@ -16,3 +16,7 @@ Ollama loopback, installed model `gemma4:e4b`: 9 actual calls, 1305 input + 181 
 Optional AI is bounded to deterministic intent abstentions. Strict two-field schema, exact input quotes, cache invalidation by provider/model/schema/prompt/input, call/output/timeout limits, and fallback remain enforced. It cannot generate IDs, policy or steps. Cloud access remains unverified after the historical HTTP 401 and was not retried. The deterministic full run does not claim an LLM investigation or an AI dataset accuracy gain.
 
 Additional source-review experiment on gemma4:e4b: 2 calls, 1240 input + 1536 output tokens, zero API fee. Both bounded batches failed validation and were excluded from inference. Combined observed development experiments: 11 calls, 2545 input + 1717 output tokens. These are separate from the final run's zeros. Local hardware/electricity and Codex engineering cost remain unmeasured.
+
+## Source-repair intent integration experiment
+
+Ollama loopback `gemma4:e4b`: 2 actual calls, 309 input + 49 output = 358 tokens; API fee $0.00. End-to-end accepted 2/2 authored fixtures (one deletion, one temporary suspension), through Engine, Guard, atomic CSV writing and fresh source validation. Both deterministic baselines abstain. No dataset accuracy improvement is inferred. Initial sandbox socket denials made two transport attempts, zero successful model calls and no returned token usage; they are recorded separately, not as zero-token completions. The final 518-case run above still uses zero model calls.

@@ -2,13 +2,12 @@ from collections import defaultdict
 from dataclasses import replace
 from .models import Audit, Fact, timestamp, tokens
 from .identity import IdentityGraph
-from .intent import deletion_intent
-from .intent import AmbiguousIntent
 from .policy import Policy
 from .compiler import compile_steps
 from .relationships import RelationshipIndex,declared_subjects
 from .adapters import DEFAULT_CATEGORY
 from .adapters import EvidenceIndex
+from .intent_resolution import resolve
 from types import SimpleNamespace
 import hashlib
 
@@ -29,22 +28,14 @@ class Engine:
         self.source_reads=0
 
     def investigate(self,case,permit_partial=False):
-        try:
-            intent=deletion_intent(case['request_text'])
-        except AmbiguousIntent:
-            intent=self.intent_ai.classify(case['request_text']) if self.intent_ai else None
-            if intent is None: raise
+        resolution=resolve(case['request_text'],self.intent_ai)
+        intent=resolution.decision
         if not intent:
-            return Audit(case,'',[],'NOT_APPLICABLE',[])
+            return Audit(case,'',[],'NOT_APPLICABLE',[],intent_resolution=resolution)
         cutoff = timestamp(case['audit_at'])
         subject,aliases = self.identity.resolve(case['email'],cutoff)
         bindings=self.relationships.bind(subject,aliases,cutoff)
         keys = set(bindings)
-        matched_sources = set()
-        for alias in aliases:
-            for f in self.index.by_token.get(alias,[]):
-                if f.admissible(cutoff) and (not f.data.get('_link_at') or timestamp(f.data['_link_at'])<=cutoff):
-                    matched_sources.add(f.source)
         selected = []
         issues = []
         for key in sorted(keys):
@@ -54,8 +45,8 @@ class Engine:
                 categories.add(DEFAULT_CATEGORY[key[0]])
             # Use positive source-scoped inventory queries to prove missing rows, never lack of retrieved files.
             for snapshot in self.index.snapshots:
-                if ((snapshot.source in matched_sources or (bindings[key].kind=='SOURCE_RESOURCE_REFERENCE' and snapshot.exhaustive)) and snapshot.system==key[0]
-                    and snapshot.category in categories and snapshot.captured<=cutoff
+                if (snapshot.exhaustive is True and snapshot.system==key[0]
+                    and snapshot.category in categories and snapshot.captured<=cutoff and snapshot.observed<=cutoff
                     and key[1] not in snapshot.resources):
                     observations.append(Fact(snapshot.source,snapshot.captured,snapshot.observed,key[0],key[1],
                         snapshot.category,'ABSENT',{'_query_resource':key[1],'_query_system':key[0]},snapshot.scope,'scoped inventory absence'))
@@ -65,15 +56,19 @@ class Engine:
             if categories & {'BACKUP_ARCHIVE','DATA_FLOW'}:
                 known=[f for f in observations if f.state!='UNKNOWN']
                 # A later storage listing observes existence, not a permission/configuration change.
-                if known: observations=known
+                if known: observations=[f for f in observations if f.state!='UNKNOWN' or f.data.get('_control_observation')
+                                        or any(k in f.data for k in ('enabled','restore_allowed','eligible','decision','restore_blocked','disabled'))]
             latest_time = max(f.observed for f in observations)
             latest = [f for f in observations if f.observed==latest_time]
             # At one instant, every replica must comply; positive violating copies beat a primary absence.
             latest.sort(key=lambda f:(bool(self.policy.violation(f,cutoff)),f.captured,f.source,f.scope),reverse=True)
             fact = latest[0]
+            if categories & {'BACKUP_ARCHIVE','DATA_FLOW'} and len({f.state for f in latest})>1:
+                issues.append(f'Unresolved state: {key[0]}/{key[1]} (conflicting simultaneous controls)')
+                continue
             replica_latest={}
             for observed in observations:
-                if 'replica' not in observed.scope: continue
+                if observed.copy_role!='REPLICA': continue
                 prior=replica_latest.get(observed.scope)
                 if prior is None or observed.observed>prior.observed:
                     replica_latest[observed.scope]=observed
@@ -88,7 +83,11 @@ class Engine:
                 raise UnresolvedCase(f'{case["case_id"]}: conflicting resource ownership at {fact.source}/{fact.resource}')
             if len({f.state for f in latest})>1:
                 issues.append(f'Conflicting simultaneous observations: {key[0]}/{key[1]}')
-            if fact.state=='UNKNOWN':
+            if (fact.category=='SUPPORT_ATTACHMENT' and self.policy.action(fact,cutoff)=='DELETE'
+                    and 'shared_subjects' in fact.data and subject not in fact.data['shared_subjects']):
+                issues.append(f'Unresolved state: {key[0]}/{key[1]} (sole owner is not deletion subject)')
+                continue
+            if fact.state=='UNKNOWN' or self.policy.action(fact,cutoff)=='UNKNOWN':
                 # A mere archive listing proves storage, not whether restore access is open.
                 issues.append(f'Unresolved state: {key[0]}/{key[1]}')
                 continue
@@ -104,7 +103,7 @@ class Engine:
             status='INCOMPLETE'
             for step in steps:
                 if step['phase']!='FINDING': step['evidence_id']=''
-        return Audit(case,subject,selected,status,steps,issues,bindings=bindings)
+        return Audit(case,subject,selected,status,steps,issues,bindings=bindings,intent_resolution=resolution)
 
     def reinvestigate(self,case,audit,max_sources=4):
         """Reread only admissible sources touching this subject; never invent a link.

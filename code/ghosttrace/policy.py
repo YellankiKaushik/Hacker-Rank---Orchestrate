@@ -1,6 +1,23 @@
 """Data-driven policy actions and explicit condition checks."""
 from .adapters import identifying
 from .models import timestamp
+from .controls import boolean
+
+
+def attachment_ownership(data):
+    """A subject selector proves association; sole ownership needs its own witness."""
+    if 'shared_subjects' in data:
+        owners=data['shared_subjects']
+        if not isinstance(owners,list) or not owners or any(not isinstance(v,str) or not v.strip() for v in owners):
+            return 'UNKNOWN'
+        return 'SHARED' if len(set(owners))>1 else 'SOLE'
+    details=data.get('_link_details','').casefold()
+    if 'belongs only to' in details and 'no other subject is linked' in details:
+        return 'SOLE'
+    if 'sole_owner' in data:
+        value=boolean(data['sole_owner'])
+        if value is True: return 'SOLE'
+    return 'UNKNOWN'
 
 
 class Policy:
@@ -22,23 +39,34 @@ class Policy:
         action = rule['required_action']
         data = fact.data
         if fact.category=='SECURITY_AUDIT_LOG':
+            if 'retention_active' in data:
+                active=boolean(data['retention_active'])
+                if active is None: return 'UNKNOWN'
+                if not active: return 'DELETE'
             until = data.get('retention_until') or data.get('retained_until')
-            if until and timestamp(until) < cutoff:
-                return 'DELETE'
+            if until:
+                try:
+                    if timestamp(until) < cutoff: return 'DELETE'
+                except (ValueError,TypeError): return 'UNKNOWN'
         elif fact.category=='LEGAL_HOLD_RECORD':
+            if 'legal_hold_active' in data and boolean(data['legal_hold_active']) is None:
+                return 'UNKNOWN'
             until = data.get('retained_until')
-            if until and timestamp(until) < cutoff:
+            if until:
+                try:
+                    if timestamp(until) < cutoff: return 'DELETE'
+                except (ValueError,TypeError): return 'UNKNOWN'
+            if 'legal_hold_active' in data and boolean(data['legal_hold_active']) is False:
                 return 'DELETE'
-            if data.get('legal_hold_active') is False:
-                return 'DELETE'
-        elif fact.category=='SUPPORT_ATTACHMENT' and data.get('shared_subjects'):
-            return 'REDACT'
+        elif fact.category=='SUPPORT_ATTACHMENT':
+            ownership=attachment_ownership(data)
+            return {'SOLE':'DELETE','SHARED':'REDACT','UNKNOWN':'UNKNOWN'}[ownership]
         return action
 
     def violation(self, fact, cutoff):
         action = self.action(fact,cutoff)
         state = fact.state
-        if state == 'UNKNOWN':
+        if state == 'UNKNOWN' or action == 'UNKNOWN':
             return None
         if fact.category=='BACKUP_ARCHIVE':
             return state=='ACTIVE'

@@ -13,6 +13,7 @@ from .models import Audit,timestamp
 from .compiler import HEADER,FIELDS,OPERATIONS,sort_key
 from .loader import read_csv
 from .intent import deletion_intent
+from .intent_resolution import validated_decision
 
 POLICY_VERSION='bounded-evidence-v1'
 
@@ -28,7 +29,7 @@ def validate_candidate_audit(audit,sources):
     if audit.status not in ('COMPLETE','INCOMPLETE','NOT_APPLICABLE'):
         raise ValueError('Invalid candidate status')
     if not isinstance(audit.steps,list): raise ValueError('Candidate steps must be an array')
-    intent=deletion_intent(audit.case['request_text'])
+    intent=validated_decision(audit.case['request_text'],audit.intent_resolution)
     if (audit.status=='NOT_APPLICABLE')!= (not intent):
         raise ValueError('Candidate status conflicts with deletion intent')
     if audit.status=='NOT_APPLICABLE' and audit.steps: raise ValueError('Non-deletion candidate has steps')
@@ -52,13 +53,14 @@ def validate_candidate_audit(audit,sources):
     if audit.steps!=sorted(audit.steps,key=sort_key): raise ValueError('Noncanonical candidate ordering')
 
 
-def validate_candidate_file(path,cases,sources):
+def validate_candidate_file(path,cases,sources,intent_resolutions=None):
     rows=read_csv(path,','.join(HEADER))
     if [r['case_id'] for r in rows]!=sorted(c['case_id'] for c in cases):
         raise ValueError('Missing, duplicate, extra or unsorted candidate case')
     by_id={c['case_id']:c for c in cases}
     for row in rows:
-        validate_candidate_audit(Audit(by_id[row['case_id']],'',[],row['deletion_status'],json.loads(row['steps_json'])),sources)
+        validate_candidate_audit(Audit(by_id[row['case_id']],'',[],row['deletion_status'],json.loads(row['steps_json']),
+            intent_resolution=(intent_resolutions or {}).get(row['case_id'])),sources)
     return len(rows)
 
 
@@ -76,6 +78,9 @@ def validate_emitted_sources(audit,guard,policy,aliases):
         if link is None or not guard.relationships.validates(key,link,aliases,cutoff,audit.bindings):
             raise ValueError('Candidate step has no verified identity binding')
         if not guard.source_supports(fact): raise ValueError('Candidate fact fails original source reread')
+        if (fact.category=='SUPPORT_ATTACHMENT' and policy.action(fact,cutoff)=='DELETE'
+                and 'shared_subjects' in fact.data and audit.subject not in fact.data['shared_subjects']):
+            raise ValueError('Candidate attachment sole owner is not deletion subject')
         finding,remedy,verify=policy.operations(fact,cutoff)
         if fact.state=='ABSENT' and verify in ('VERIFY_RECORD_REDACTED','VERIFY_RECORD_ANONYMIZED'):
             verify='VERIFY_RECORD_ABSENT'

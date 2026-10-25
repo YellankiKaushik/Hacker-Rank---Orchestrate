@@ -40,6 +40,8 @@ def audit(root,corpus,index,metrics):
             cause=('ENGINE_OMISSION' if admitted and (system,resource) in links else
                    'MISSING_SUBJECT_SELECTOR' if admitted else
                    'ONLY_POST_CUTOFF_OBSERVATIONS' if observations else 'NO_STATE_OBSERVATION')
+            if admitted and (system,resource) in links and any(engine.policy.action(f,cut)=='UNKNOWN' for f in admitted):
+                cause='MISSING_CONDITIONAL_POLICY_PROOF'
             raw_admitted=sorted(source for source,time,content in raw if time<=cut and resource in content)
             if not observations and raw_admitted: cause='RAW_SOURCE_MENTION_REQUIRES_STATE_INTERPRETATION'
             taxonomy[classify(operation,category)]+=1; reasons[cause]+=1
@@ -79,7 +81,7 @@ def audit(root,corpus,index,metrics):
     for d in details:
         report+=f"| {d['case_id']} | {d['type']} | {d['operation']}:{d['resource']} | {d['cause']} | {', '.join(d['admitted_sources']) or 'none'} | {', '.join(d['excluded_sources']) or 'none'} |\n"
     report+='''
-    The common defect in the available proof is a missing subject selector on anonymous account/anonymized analytics readbacks, or a source captured after cutoff. This table distinguishes that limitation from a bound admissible fact omitted by the engine. Every missing resource is also searched literally in raw admitted source text/OCR to expose possible parser omissions; a raw mention alone is not a proven state. Post-cutoff sources explain a benchmark mismatch only; they never supply an earlier decision. No additional explicit identity-bearing non-catalog activity was found for the public sample in the checked cutoff windows.
+    The common proof gaps are missing selectors on anonymous readbacks, post-cutoff captures, and unverified attachment exclusivity. Missing conditional-policy proof is deliberately withheld; it is distinguished from a repairable engine omission. Every missing resource is also searched literally in raw admitted text/OCR; a mention alone is not a proven state or sole ownership. Later sources explain benchmark mismatches only and never supply earlier decisions.
 
 All nine requested root-cause classes were considered. Categories 6 (identity) and 7 (time) are represented by the selector/capture causes; category 8 would identify a missing known policy operation. Category 9 is measured separately. The three extra resources have explicit admitted source relationships; deleting them solely to match reference answers would remove supported obligations.
 '''

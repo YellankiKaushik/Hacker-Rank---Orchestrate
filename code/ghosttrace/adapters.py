@@ -9,6 +9,7 @@ import sqlite3
 from .models import Fact, timestamp, tokens
 from .loader import contained_path
 from .media import image_text, pdf_text
+from .controls import control_state
 
 COLLECTIONS = {
     'customer_profiles': ('account_service','USER_PROFILE'),
@@ -64,17 +65,13 @@ def identifying(data, stable=False):
 
 
 def state_of(category, data):
+    if category in ('DATA_FLOW','BACKUP_ARCHIVE'):
+        return control_state(category,data)
     explicit = data.get('result') if 'record_type' in data else data.get('_state')
     if explicit:
         return {'NOT_FOUND':'ABSENT','FOUND':'PRESENT','IDENTIFIABLE':'PII'}.get(explicit, explicit)
     if data.get('status_code') == 404 or str(data.get('http_status','')) == '404':
         return 'ABSENT'
-    if category == 'DATA_FLOW':
-        if 'enabled' not in data: return 'UNKNOWN'
-        return 'ACTIVE' if str(data.get('enabled')).lower() in ('true','1') else 'DISABLED'
-    if category == 'BACKUP_ARCHIVE':
-        if 'restore_allowed' not in data: return 'UNKNOWN'
-        return 'ACTIVE' if str(data.get('restore_allowed')).lower() in ('true','1') else 'BLOCKED'
     if category == 'ANALYTICS_PROFILE' or category == 'PRODUCT_TELEMETRY':
         return 'PII' if identifying(data, stable=True) else 'ANONYMIZED'
     if category in ('SUPPORT_MESSAGE','EMAIL_DELIVERY_LOG','ACCOUNT_TOMBSTONE'):
@@ -189,7 +186,9 @@ class EvidenceIndex:
             source = {**source, '_captured':timestamp(source['captured_at'])}
             extension = path.suffix
             if extension == '.json': self.json(source,json.loads(path.read_text(encoding='utf-8')))
-            elif extension == '.sql': self.sql(source,restricted_sql(path.read_text(encoding='utf-8')))
+            elif extension == '.sql':
+                sql_text=path.read_text(encoding='utf-8')
+                self.sql({**source,'_sql_text':sql_text},restricted_sql(sql_text))
             elif extension == '.log': self.logs(source,path.read_text(encoding='utf-8'))
             elif extension == '.txt': self.text(source,path.read_text(encoding='utf-8'))
             elif extension in ('.pdf','.png'):
@@ -214,6 +213,8 @@ class EvidenceIndex:
             raise ValueError('Missing observation scope')
         if str(data.get('account_status','')).upper() == 'DELETED' and category == 'USER_PROFILE':
             category = 'ACCOUNT_TOMBSTONE'
+        if category=='DATA_FLOW' and scope!='media':
+            data={**data,'_control_observation':True}
         self.facts.append(Fact(source['file_id'],source['_captured'],
             timestamp(observed) if isinstance(observed,str) else observed or source['_captured'],
             system,resource,category,state_of(category,data),data,scope,locator))
@@ -260,7 +261,10 @@ class EvidenceIndex:
                     self.add(source,system,row['resource_id'],category,row,source['_captured'],name,row['resource_id'])
                 # Dedicated physical-table captures can answer a referenced primary-key query.
                 # Service inventory exports are scoped batches, not an all-customer census.
-                exhaustive=name in ('customer_profiles_primary','customer_profiles_failover_replica','search_documents_primary')
+                sql_text=source.get('_sql_text','')
+                exhaustive=(name in ('customer_profiles_primary','customer_profiles_failover_replica','search_documents_primary')
+                    and 'point-in-time database snapshot' in sql_text and re.search(r'COMMIT\s*;',sql_text,re.I) is not None
+                    and re.search(r'CREATE TABLE '+re.escape(name)+r'\s*\(\s*resource_id TEXT PRIMARY KEY',sql_text,re.I) is not None)
                 self.snapshots.append(Snapshot(source['file_id'],source['_captured'],source['_captured'],system,category,name,{r['resource_id'] for r in rows},exhaustive))
 
     def logs(self, source, text):
@@ -272,24 +276,32 @@ class EvidenceIndex:
             category = data.get('record_type',DEFAULT_CATEGORY.get(system,''))
             state = None
             if event in ('profile_lookup_completed','contact_lookup_completed','contact_query_completed'):
-                state = 'ABSENT' if str(data.get('rows')) == '0' else 'PRESENT'
+                rows=str(data.get('rows'))
+                state = ('ABSENT' if int(rows)==0 else 'PRESENT') if re.fullmatch(r'\d+',rows) else 'UNKNOWN'
                 if event.startswith('contact_'):
                     category = 'SECONDARY_IDENTIFIER'; system = 'support_platform' if system=='support_replica' else system
-            elif event == 'index_query_completed': state = 'PRESENT' if data.get('result')=='hit' else 'ABSENT'
+            elif event == 'index_query_completed': state = {'hit':'PRESENT','miss':'ABSENT'}.get(data.get('result'),'UNKNOWN')
             elif event in ('analytics_identity_scan','message_pii_scan'): state = 'PII'
-            elif event == 'analytics_profile_read': state = 'ANONYMIZED' if str(data.get('direct_identifiers'))=='0' else 'PII'
+            elif event == 'analytics_profile_read':
+                count=str(data.get('direct_identifiers'))
+                state=('ANONYMIZED' if int(count)==0 else 'PII') if re.fullmatch(r'\d+',count) else 'UNKNOWN'
             elif event == 'analytics_profile_read_completed': state = state_of('ANALYTICS_PROFILE',data)
             elif event in ('attachment_pii_scan','export_download_check_completed','export_metadata_read_completed'):
                 state = 'PRESENT'; category = 'SUPPORT_ATTACHMENT' if event=='attachment_pii_scan' else 'USER_EXPORT'
             elif event in ('connector_heartbeat','connector_config_loaded','connector_config_read_completed'):
-                state = 'ACTIVE' if data.get('enabled')=='true' else 'DISABLED'
-            elif event == 'restore_candidate_evaluated': state = 'ACTIVE' if data.get('eligible')=='true' else 'BLOCKED'
-            elif event == 'restore_authorization_completed': state = 'BLOCKED' if data.get('decision')=='deny' else 'ACTIVE'
-            elif event == 'restore_policy_read_completed': state = 'ACTIVE' if data.get('restore_allowed')=='true' else 'BLOCKED'
-            elif event == 'audit_record_read_completed': state = 'PRESENT' if str(data.get('rows'))=='1' else 'ABSENT'
+                category='DATA_FLOW'; state=control_state(category,data); data['_control_observation']=True
+            elif event in ('restore_candidate_evaluated','restore_authorization_completed','restore_policy_read_completed'):
+                category='BACKUP_ARCHIVE'; state=control_state(category,data); data['_control_observation']=True
+            elif event == 'audit_record_read_completed':
+                rows=str(data.get('rows'))
+                state=('ABSENT' if int(rows)==0 else 'PRESENT') if re.fullmatch(r'\d+',rows) else 'UNKNOWN'
             elif event in ('message_read','support_ticket_read_completed'): state = state_of('SUPPORT_MESSAGE',data)
             elif event == 'record_lookup': state = state_of(category,data)
             if state and category:
+                required={'connector_heartbeat':'enabled','connector_config_loaded':'enabled','connector_config_read_completed':'enabled',
+                          'restore_candidate_evaluated':'eligible','restore_authorization_completed':'decision',
+                          'restore_policy_read_completed':'restore_allowed'}.get(event)
+                if required and required not in data: state='UNKNOWN'
                 self.add(source,system,resource,category,{**data,'_state':state},time,'log',f'line:{line}')
 
     def text(self, source, text):
@@ -313,7 +325,8 @@ class EvidenceIndex:
                 # OCR can turn a printed underscore into a space. Only normalize this
                 # separator for an already supplied stable reference; no fuzzy name/ID joins.
                 label_pattern=r'(?<!\w)'+re.escape(label).replace('_',r'[_\s]+')+r'(?!\w)'
-                if not re.search(label_pattern,folded) and row['resource_id'].casefold() not in folded:
+                resource_pattern=r'(?<!\w)'+re.escape(row['resource_id'].casefold()).replace('_',r'[_\s]+')+r'(?!\w)'
+                if not re.search(label_pattern,folded) and not re.search(resource_pattern,folded):
                     continue
                 system = row['target_system']
                 # A shared subject ID in an unrelated document does not identify this resource.
@@ -321,14 +334,24 @@ class EvidenceIndex:
                     continue
                 category = DEFAULT_CATEGORY.get(system)
                 if not category: continue
+                # Use an explicit panel boundary when supplied. Never borrow state/PII
+                # from a neighboring subject. Column-major OCR without a safe boundary
+                # remains ambiguous for permission/identifier interpretation.
+                panels=re.split(r'\n\s*(?:---+|===+)\s*\n|\f',text)
+                matching=[p for p in panels if re.search(label_pattern,p.casefold()) or re.search(resource_pattern,p.casefold())]
+                region=matching[0] if len(matching)==1 else text
+                region_folded=re.sub(r'\s+',' ',region).casefold()
+                subjects={re.sub(r'[_\s]+','_',v) for v in re.findall(r'\buser[_\s]+\d+\b',region_folded)}
+                ambiguous_region=len(subjects)>1
                 state = 'PRESENT'
-                if category in ('ANALYTICS_PROFILE','PRODUCT_TELEMETRY','SUPPORT_MESSAGE'): state='PII'
+                if category in ('ANALYTICS_PROFILE','PRODUCT_TELEMETRY','SUPPORT_MESSAGE'):
+                    state='UNKNOWN' if ambiguous_region else 'PII'
                 elif category == 'DATA_FLOW':
-                    state = 'ACTIVE' if 'continuous' in folded and ('delivered' in folded or 'events/hour' in folded) else 'UNKNOWN'
+                    state = 'ACTIVE' if not ambiguous_region and 'continuous' in region_folded and ('delivered' in region_folded or 'events/hour' in region_folded) else 'UNKNOWN'
                 elif category == 'BACKUP_ARCHIVE': state = 'UNKNOWN'
                 elif category == 'ACCOUNT_TOMBSTONE':
-                    state = 'PII' if re.search(r'[\w.+-]+@[\w.-]+\.[a-z]+',folded) else 'REDACTED'
-                data = {'_state':state,'_content':text,'_link_at':row['event_time'],
+                    state = 'UNKNOWN' if ambiguous_region else ('PII' if re.search(r'[\w.+-]+@[\w.-]+\.[a-z]+',region_folded) else 'REDACTED')
+                data = {'_state':state,'_content':region,'_link_at':row['event_time'],
                         '_catalog_source':row['activity_id'],'subject_reference':uid[0] if uid else '',
                         '_bindings':[uid[0] if uid else '',row['details']],
                         '_link_details':row['details']}

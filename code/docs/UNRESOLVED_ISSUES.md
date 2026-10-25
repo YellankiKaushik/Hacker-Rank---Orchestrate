@@ -1,6 +1,6 @@
 # Unresolved evidence and execution issues
 
-Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 rows; uncertain 91. Recovered B: case_112, case_155, case_204, case_213, case_297, case_308, case_57. Candidate row coverage does not resolve source gaps. Separate per-case assumptions/omitted obligations are in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md.
+Updated 2026-10-25T01:21:20.924479+00:00. Strict unresolved 103; candidate 518 rows; uncertain 103. Recovered B: case_112, case_155, case_204, case_213, case_297, case_308, case_57. Candidate row coverage does not resolve source gaps. Separate per-case assumptions/omitted obligations are in artifacts/SUBMISSION_UNCERTAINTY_REPORT.md.
 
 | Case | Admitted evidence examined | Missing fact and impact | Candidate; recommended next action |
 |---|---|---|---|
@@ -20,6 +20,7 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 | case_183 | evidence_83 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_190 | evidence_83 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_191 | evidence_83 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_203 | evidence_20 | case_203: Unresolved state: support_platform/support_8903 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_206 | evidence_20 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_215 | evidence_81 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_218 | evidence_81 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
@@ -33,6 +34,7 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 | case_253 | evidence_24 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_257 | evidence_24 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_260 | evidence_24 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_263 | evidence_25 | case_263: Unresolved state: support_platform/support_5234 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_274 | evidence_77 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_276 | evidence_77 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_277 | evidence_77 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
@@ -41,6 +43,7 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 | case_299 | evidence_75 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_304 | evidence_29 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_309 | evidence_29 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_311 | evidence_29 | case_311: Unresolved state: support_platform/support_4952 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_313 | evidence_74 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_314 | evidence_74 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_319 | evidence_74 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
@@ -48,20 +51,25 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 | case_335 | evidence_72 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_336 | evidence_72 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_339 | evidence_72 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_34 | evidence_01, evidence_04 | case_34: Unresolved state: support_platform/support_9538 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_343 | evidence_71 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_345 | evidence_71 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_346 | evidence_71 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_351 | evidence_71 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_354 | evidence_33 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_359 | evidence_33 | case_359: Unresolved state: support_platform/support_2537 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_362 | evidence_33 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_371 | evidence_34 | case_371: Unresolved state: support_platform/support_3110 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_393 | evidence_69 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_395 | evidence_69 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_398 | evidence_69 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_403 | evidence_38 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_407 | evidence_38 | case_407: Unresolved state: support_platform/support_3802 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_408 | evidence_38 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_409 | evidence_38 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_411 | evidence_38 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_412 | evidence_38 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_419 | evidence_39 | case_419: Unresolved state: support_platform/support_2944 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_423 | evidence_68 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_424 | evidence_68 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_427 | evidence_68 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
@@ -69,6 +77,7 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 | case_448 | evidence_66 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_45 | evidence_37, evidence_55 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_452 | evidence_66 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_455 | evidence_43 | case_455: Unresolved state: support_platform/support_2055 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_456 | evidence_43 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_457 | evidence_43 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_458 | evidence_43 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
@@ -77,13 +86,16 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 | case_464 | evidence_65 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_467 | evidence_65 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_470 | evidence_65 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_479 | evidence_45 | case_479: Unresolved state: support_platform/support_4665 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_480 | evidence_45 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_493 | evidence_63 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_494 | evidence_63 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_497 | evidence_63 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_502 | evidence_63 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_503 | evidence_47 | case_503: Unresolved state: support_platform/support_2295 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_506 | evidence_47 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_512 | evidence_47 | Unsupported COMPLETE: required deletion coverage is unproven; retention alone does not prove deletion | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
+| case_515 | evidence_48 | case_515: Unresolved state: support_platform/support_4533 | INCOMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_524 | evidence_62 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_530 | evidence_62 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
 | case_532 | evidence_62 | Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source | COMPLETE unproven; obtain explicit pre-cutoff selector/state readback, then rerun strict audit |
@@ -101,6 +113,8 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 - case_01: case_01: no admissible subject-linked state evidence
 - case_02: case_02: no admissible subject-linked state evidence
 - case_04: case_04: no admissible subject-linked state evidence
+- case_07: case_07: Unresolved state: support_platform/support_001
+- case_13: case_13: Unresolved state: support_platform/support_4218
 - case_21: Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source
 - case_25: Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source
 - case_26: Unsupported COMPLETE: required deletion coverage is unproven; unbound account readbacks in admitted source
@@ -116,3 +130,26 @@ Updated 2026-10-24T19:27:22.010787+00:00. Strict unresolved 91; candidate 518 ro
 - A fresh isolated virtualenv installed pinned pypdf from official PyPI after a workspace TEMP workaround for sandbox ACL. verify_environment.py checks dependency origin/user-site isolation; the release checker records actual clean execution. Final raw trace export waits until session ends and app closes as required by official instructions. Originals remain preserved. No HackerRank upload occurred.
 - Output privacy review passes. Contest-specific public-publication terms remain NOT VERIFIED: the registration page requires login, and Windows browser automation stopped because it could not verify the URL. The conditional public output commit is withheld; its hash is recorded in the sanitized GitHub release record. General content ownership does not establish event-specific permission.
 - New source-review AI batches failed bounded validation and were not used. No accuracy benefit or complete reproducibility is claimed for that optional experiment.
+
+## Source repair checkpoint
+
+See SOURCE_REPAIR_REPORT.md for exact defects, the preserved baseline and measured safety-driven regression. Missing attachment exclusivity is an unresolved policy condition; it does not authorize DELETE. General media row geometry and broader ambiguous intent remain limited.
+
+## Unresolved attachment policy conditions
+
+Association and observed existence are verified; exclusive ownership is not. These omissions prevent an unsupported DELETE and lower accepted coverage.
+
+| Case | Resource | Admitted evidence examined | Missing fact, impact and next action |
+|---|---|---|---|
+| case_203 | support_platform/support_8903 | evidence_20 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_263 | support_platform/support_5234 | evidence_25 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_311 | support_platform/support_4952 | evidence_29 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_34 | support_platform/support_9538 | evidence_01 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_359 | support_platform/support_2537 | evidence_33 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_371 | support_platform/support_3110 | evidence_34 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_407 | support_platform/support_3802 | evidence_38 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_419 | support_platform/support_2944 | evidence_39 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_455 | support_platform/support_2055 | evidence_43 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_479 | support_platform/support_4665 | evidence_45 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_503 | support_platform/support_2295 | evidence_47 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |
+| case_515 | support_platform/support_4533 | evidence_48 | Sole/shared ownership unresolved; no attachment deletion emitted. Obtain an explicit cutoff-admissible ownership record, then rerun strict policy review. |

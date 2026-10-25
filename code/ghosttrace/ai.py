@@ -115,6 +115,7 @@ class IntentAI:
         return {'DELETION':True,'NON_DELETION':False,'UNCERTAIN':None}[value['intent']]
 
     def classify(self,text):
+        self.last_result=None
         if not self.ready() or len(text.encode('utf-8'))>3000: return None
         c=self.config
         digest=hashlib.sha256(json.dumps([PROMPT_VERSION,c.provider,c.model,SCHEMA,text],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
@@ -123,6 +124,7 @@ class IntentAI:
             try:
                 value=json.loads(cached.read_text(encoding='utf-8'))
                 decision=self.validate(value,text)
+                self.last_result=value
                 self.usage['cache_hits']+=1
                 return decision
             except (ValueError,OSError): pass
@@ -173,5 +175,6 @@ class IntentAI:
             if cached:
                 cached.parent.mkdir(parents=True,exist_ok=True)
                 cached.write_text(json.dumps(value,ensure_ascii=False),encoding='utf-8')
+            self.last_result=value
             return decision
         return None

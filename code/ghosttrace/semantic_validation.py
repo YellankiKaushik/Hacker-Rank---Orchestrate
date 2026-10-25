@@ -11,17 +11,24 @@ from .reviewer import GhostGuard
 from .validator import validate_file
 
 
-def validate_semantic_file(path,cases,corpus,cache_dir):
+def validate_semantic_file(path,cases,corpus,cache_dir,intent_resolutions=None):
     count=validate_file(path,cases,corpus.sources)
     index=EvidenceIndex(corpus,cache_dir)
     engine=Engine(corpus,index)
     guard=GhostGuard(corpus,index)
     rows={r['case_id']:r for r in read_csv(path)}
     for case in cases:
+        resolution=(intent_resolutions or {}).get(case['case_id'])
+        if resolution:
+            from .intent_resolution import validated_decision
+            from types import SimpleNamespace
+            validated_decision(case['request_text'],resolution)
+            engine.intent_ai=SimpleNamespace(classify=lambda text,r=resolution:r.decision,last_result={'quote':resolution.quote})
+        else: engine.intent_ai=None
         expected=engine.investigate(case)
         row=rows[case['case_id']]
         submitted=Audit(case,expected.subject,expected.facts,row['deletion_status'],json.loads(row['steps_json']),
-                        expected.issues,expected.bindings)
+                        expected.issues,expected.bindings,intent_resolution=expected.intent_resolution)
         if submitted.status!=expected.status:
             raise ValueError(f'{case["case_id"]}: submitted status conflicts with source-derived state')
         aliases=engine.identity.aliases(timestamp(case['audit_at'])).get(expected.subject,set())

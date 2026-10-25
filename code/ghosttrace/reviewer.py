@@ -12,6 +12,7 @@ from .adapters import EvidenceIndex,restricted_sql,COLLECTIONS,DEFAULT_CATEGORY
 from .validator import validate_audit
 from .relationships import RelationshipIndex
 from .intent import deletion_intent,AmbiguousIntent
+from .intent_resolution import validated_decision
 
 
 class ReviewError(ValueError):
@@ -38,18 +39,20 @@ class GhostGuard:
         self.activities={r['activity_id']:r for r in corpus.activities}
         self.raw_cache={}
         self.reparsed={}
-        self.scan=[(f,f.binding_tokens) for f in index.facts]
+        # Rebuild obligations from original files, not the primary's facts/token index.
+        # Shared extraction/policy remain a documented independence limitation.
+        self.obligation_index=EvidenceIndex(corpus,getattr(index,'cache_dir',None)) if corpus.manifest and hasattr(corpus,'root') else index
+        self.scan=[(f,f.binding_tokens) for f in self.obligation_index.facts]
         self.reviewed=0
         self.challenges=0
         self.challenged_cases=set()
-        self.relationships=RelationshipIndex(corpus,index)
+        self.relationships=RelationshipIndex(corpus,self.obligation_index)
 
     def refresh(self,index):
         if any(self.index.source_hashes.get(k)!=v for k,v in index.source_hashes.items()):
             raise ReviewError('Source changed during targeted review')
         self.index=index
-        self.relationships=RelationshipIndex(self.corpus,index)
-        self.scan=[(f,f.binding_tokens) for f in index.facts]
+        self.relationships=RelationshipIndex(self.corpus,self.obligation_index)
 
     def source_supports(self,fact):
         """Fetch original source, not primary summary; check locator/scope membership."""
@@ -62,6 +65,7 @@ class GhostGuard:
                     and fact.observed==timestamp(row['event_time']) and fact.captured==timestamp(row['event_time']))
         row=self.source_rows.get(fact.source)
         if not row: return False
+        if fact.captured!=timestamp(row['captured_at']): return False
         path=contained_path(self.corpus.root,row['file_path'])
         if hashlib.sha256(path.read_bytes()).hexdigest()!=self.index.source_hashes[fact.source]:
             return False
@@ -74,11 +78,19 @@ class GhostGuard:
         raw=self.raw_cache[fact.source]
         if path.suffix=='.sql':
             if fact.locator=='scoped inventory absence':
+                # Independently check physical relation semantics, source time and keyed selector.
+                physical={'customer_profiles_primary':('account_service','USER_PROFILE'),
+                          'customer_profiles_failover_replica':('account_service','USER_PROFILE'),
+                          'search_documents_primary':('search_service','SEARCH_INDEX_ENTRY')}
+                if physical.get(fact.scope)!=(fact.system,fact.category): return False
+                source_text=path.read_text(encoding='utf-8')
+                if ('point-in-time database snapshot' not in source_text or not re.search(r'COMMIT\s*;',source_text,re.I)
+                    or not re.search(r'CREATE TABLE '+re.escape(fact.scope)+r'\s*\(\s*resource_id TEXT PRIMARY KEY',source_text,re.I)):
+                    return False
+                if fact.captured!=timestamp(row['captured_at']) or fact.observed!=fact.captured: return False
+                if fact.data!={'_query_resource':fact.resource,'_query_system':fact.system}: return False
                 table=raw.get(fact.scope)
-                if table is None: return False
-                scoped=[r for r in table if ('origin_system' not in r or
-                    (r['origin_system']==fact.system and COLLECTIONS.get(r.get('collection_name'),('',''))[1]==fact.category))]
-                return not any(r.get('resource_id')==fact.resource for r in scoped)
+                return table is not None and not any(r.get('resource_id')==fact.resource for r in table)
         if fact.source not in self.reparsed:
             fresh=EvidenceIndex.__new__(EvidenceIndex)
             fresh.facts=[]; fresh.snapshots=[]; fresh.media={}
@@ -103,11 +115,12 @@ class GhostGuard:
     def review(self,audit,policy,aliases):
         validate_audit(audit,self.corpus.sources)
         self.reviewed+=1
-        try: intent=deletion_intent(audit.case['request_text'])
+        try: intent=validated_decision(audit.case['request_text'],audit.intent_resolution)
         except AmbiguousIntent: intent=None
         if audit.status=='NOT_APPLICABLE':
             return [] if intent is False else ['Unsupported non-deletion verdict: authorization is not independently established']
         if intent is False: return ['Contradicted deletion verdict: request does not authorize deletion']
+        if intent is None: return ['Unsupported deletion verdict: authorization is not independently established']
         cutoff=timestamp(audit.case['audit_at'])
         issues=[]
         fact_map={(f.system,f.resource):f for f in audit.facts}
@@ -126,8 +139,29 @@ class GhostGuard:
             if fact.data.get('_link_at') and timestamp(fact.data['_link_at'])>cutoff:
                 issues.append(f'Future identity binding: {fact.resource}')
             if fact.state=='UNKNOWN': issues.append(f'Unproven state: {fact.resource}')
+            # Check chronology and remaining physical replicas from independently
+            # rebuilt source observations, without rerunning Engine selection.
+            observed=[f for f in self.obligation_index.by_resource[(fact.system,fact.resource)] if f.admissible(cutoff)
+                and (not f.data.get('_link_at') or timestamp(f.data['_link_at'])<=cutoff)]
+            relevant=[f for f in observed if f.state!='UNKNOWN' or f.data.get('_control_observation')]
+            comparable=[f for f in relevant if f.copy_role==fact.copy_role and
+                (f.copy_role!='REPLICA' or f.scope==fact.scope)]
+            if comparable:
+                newest=max(f.observed for f in comparable)
+                later=[f for f in comparable if f.observed==newest and f.observed>fact.observed]
+                if any(f.state!=fact.state for f in later):
+                    issues.append(f'Conflicting newer source state: {fact.system}/{fact.resource}')
+            replica_scopes={f.scope for f in relevant if f.copy_role=='REPLICA'}
+            for scope in replica_scopes:
+                copies=[f for f in relevant if f.scope==scope]
+                newest=max(f.observed for f in copies)
+                if any(policy.violation(f,cutoff) for f in copies if f.observed==newest) and not policy.violation(fact,cutoff):
+                    issues.append(f'Conflicting remaining replica: {fact.system}/{fact.resource}/{scope}')
             ops={s['operation'] for s in audit.steps if (s['system_id'],s['resource_id'])==(fact.system,fact.resource)}
             violation=policy.violation(fact,cutoff)
+            if (fact.category=='SUPPORT_ATTACHMENT' and policy.action(fact,cutoff)=='DELETE'
+                    and 'shared_subjects' in fact.data and audit.subject not in fact.data['shared_subjects']):
+                issues.append(f'Unsafe deletion of another attachment owner: {fact.resource}')
             finding,remediation,verification=policy.operations(fact,cutoff)
             if violation and (finding not in ops or remediation not in ops):
                 issues.append(f'Missing policy finding/remediation: {fact.resource}')
@@ -191,7 +225,7 @@ class GhostGuard:
             if not roots:
                 sources={f.source for f in audit.facts}
                 from .relationships import declared_subjects
-                unknown_roots=[f for f in self.index.facts if f.source in sources and f.admissible(cutoff)
+                unknown_roots=[f for f in self.obligation_index.facts if f.source in sources and f.admissible(cutoff)
                     and f.category in ('USER_PROFILE','ACCOUNT_TOMBSTONE') and (f.system,f.resource) not in keys
                     and not declared_subjects(f,self.relationships.known_subjects)]
                 treatment=any(policy.action(f,cutoff)!='RETAIN' and not policy.violation(f,cutoff)

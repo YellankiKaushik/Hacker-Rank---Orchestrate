@@ -66,7 +66,8 @@ def run(dataset,requests,output,cache_dir,allow_unresolved=False,review=True,ai=
                 detail['candidate_status']=audit.status
         case_diagnostics.append(detail)
     if not unresolved or mode=='candidate':
-        validator=validate_candidate_file if mode=='candidate' else validate_file
+        resolutions={a.case['case_id']:a.intent_resolution for a in audits}
+        validator=(lambda path,cases,sources:validate_candidate_file(path,cases,sources,resolutions)) if mode=='candidate' else validate_file
         write_output(output,audits,pre_replace=lambda path:validator(path,cases,corpus.sources))
     metrics={'cases':len(cases),'resolved':len(audits),'unresolved':unresolved,
         'statuses':dict(Counter(a.status for a in audits)), 'runtime_seconds':time.perf_counter()-start,
@@ -85,6 +86,11 @@ def run(dataset,requests,output,cache_dir,allow_unresolved=False,review=True,ai=
         metrics['semantic_certainty']='FAIL' if uncertain else 'PASS'
         write_uncertainty(uncertainty_path or Path(output).parent/'artifacts/SUBMISSION_UNCERTAINTY_REPORT.md',metrics)
     if intent_ai:
+        from ghosttrace.intent_resolution import to_dict
+        provenance={a.case['case_id']:to_dict(a.intent_resolution) for a in audits if a.intent_resolution and a.intent_resolution.method=='AI'}
+        sidecar=Path(output).with_suffix('.intent.json')
+        sidecar.write_text(json.dumps(provenance,ensure_ascii=False,indent=2),encoding='utf-8')
+        metrics['intent_provenance_cases']=len(provenance)
         metrics['ai_usage']=intent_ai.usage
         metrics['model_calls']=intent_ai.usage['attempts']
         for field in ('input_tokens','output_tokens','estimated_cost_usd'):
