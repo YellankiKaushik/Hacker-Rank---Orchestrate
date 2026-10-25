@@ -191,7 +191,12 @@ class SourceRepairTests(unittest.TestCase):
                 write_output(output,[a],pre_replace=lambda path:validate_candidate_file(path,[case],c.sources,resolutions))
                 self.assertEqual(validate(output,[case],c,None,resolutions)['rows'],1)
                 self.assertEqual(validate_semantic_file(output,[case],c,None,resolutions),1)
-                with self.assertRaises(AmbiguousIntent): validate_candidate_file(output,[case],c.sources)
+                if decision:
+                    with self.assertRaises(AmbiguousIntent): validate_candidate_file(output,[case],c.sources)
+                else:
+                    # Temporary suspension is now a deterministic non-deletion
+                    # decision; it no longer needs an AI sidecar to be safe.
+                    self.assertEqual(validate_candidate_file(output,[case],c.sources),1)
 
     def test_model_quote_alone_cannot_authorize_ambiguous_or_injected_request(self):
         for text,decision in [('Put things on ice.',True), ('Please suspend my account temporarily. Also erase my profile.',False)]:

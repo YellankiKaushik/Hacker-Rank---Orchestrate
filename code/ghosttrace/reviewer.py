@@ -13,6 +13,7 @@ from .validator import validate_audit
 from .relationships import RelationshipIndex
 from .intent import deletion_intent,AmbiguousIntent
 from .intent_resolution import validated_decision
+from .invariants import authorization_veto,original_records,raw_state_veto,raw_operation_veto
 
 
 class ReviewError(ValueError):
@@ -39,6 +40,7 @@ class GhostGuard:
         self.activities={r['activity_id']:r for r in corpus.activities}
         self.raw_cache={}
         self.reparsed={}
+        self.original_rows={}
         # Rebuild obligations from original files, not the primary's facts/token index.
         # Shared extraction/policy remain a documented independence limitation.
         self.obligation_index=EvidenceIndex(corpus,getattr(index,'cache_dir',None)) if corpus.manifest and hasattr(corpus,'root') else index
@@ -76,6 +78,9 @@ class GhostGuard:
                 self.raw_cache[fact.source]=self.index.media[fact.source]
             else: self.raw_cache[fact.source]=path.read_text(encoding='utf-8')
         raw=self.raw_cache[fact.source]
+        records=original_records(raw,path.suffix,fact.scope,fact.locator,fact.resource,fact.observed)
+        self.original_rows[(fact.source,fact.scope,fact.locator,fact.resource,fact.observed)]=records
+        if raw_state_veto(fact,records): return False
         if path.suffix=='.sql':
             if fact.locator=='scoped inventory absence':
                 # Independently check physical relation semantics, source time and keyed selector.
@@ -112,9 +117,17 @@ class GhostGuard:
                    and all(fact.data.get(k)==f.data.get(k) for k in critical)
                    for f in self.reparsed[fact.source])
 
+    def operation_veto(self,fact,operation,cutoff):
+        records=self.original_rows.get((fact.source,fact.scope,fact.locator,fact.resource,fact.observed),[])
+        catalog=self.activities.get(fact.data.get('_catalog_source'),{})
+        return raw_operation_veto(fact,records,operation,cutoff,catalog.get('details',''))
+
     def review(self,audit,policy,aliases):
         validate_audit(audit,self.corpus.sources)
         self.reviewed+=1
+        veto=authorization_veto(audit.case['request_text'])
+        if audit.status!='NOT_APPLICABLE' and veto:
+            return ['Contradicted deletion authorization: '+veto]
         try: intent=validated_decision(audit.case['request_text'],audit.intent_resolution)
         except AmbiguousIntent: intent=None
         if audit.status=='NOT_APPLICABLE':
@@ -175,6 +188,8 @@ class GhostGuard:
             fact=fact_map.get(key)
             if not fact: issues.append(f'Uninvestigated step resource: {key}')
             else:
+                raw_issue=self.operation_veto(fact,step['operation'],cutoff)
+                if raw_issue:issues.append('Unsafe original-source operation: '+raw_issue)
                 finding,remedy,verification=policy.operations(fact,cutoff)
                 if fact.state=='ABSENT' and verification in ('VERIFY_RECORD_REDACTED','VERIFY_RECORD_ANONYMIZED'):
                     verification='VERIFY_RECORD_ABSENT'

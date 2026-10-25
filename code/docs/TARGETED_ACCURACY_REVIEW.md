@@ -1,3 +1,5 @@
+> CURRENT PHASE 2 STATUS: see IMPLEMENTATION_STATUS.md and PHASE2_EVIDENCE_REVIEW.md. Historical checkpoint text below is superseded: current classification C; 154 tests; three invalid official plans, 415 shared strict acceptances/103 uncertain. R04/R05 fixed on authored tests; no supplied-corpus accuracy gain.
+
 # Final targeted ownership and accuracy review
 
 Baseline: `43990d03ac6de69302e59585d1d3c6f12d7ab9e8`, preserved locally under artifacts/baseline-43990d0 with CSV/ZIP hashes and reports. Main and participant inputs remain unchanged. This evaluator runs after inference; reference IDs and answers never supply production bindings, policy or steps.
@@ -280,7 +282,7 @@ python tmp/targeted-old-5b9a098/code/main.py --mode candidate --dataset dataset 
 
 | Metric | Before | After |
 |---|---:|---:|
-| tests | 136 | 140 |
+| tests | 136 | 154 |
 | status | 29 | 29 |
 | exact | 8 | 8 |
 | precision | 0.6772 | 0.6772 |

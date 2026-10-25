@@ -54,12 +54,18 @@ def identifying(data, stable=False):
             'requester_email','requester_phone','owner_email','owner_phone','customer_email'}
     if stable:
         keys |= {'user_id','customer_reference','subject_reference'}
+    if isinstance(data,list):
+        return any(identifying(v,stable) for v in data if isinstance(v,(dict,list)))
     for key, value in data.items():
+        # A typed readback envelope identifies its query subject, not a stored
+        # analytics identity field. Actual payload/nested fields still count.
+        if key=='subject_reference' and 'record_type' in data and 'result' in data:
+            continue
         if key in keys and populated(value):
             return True
         if key in ('message_text','message_excerpt') and populated(value) and tokens(str(value)) != {str(value).casefold()}:
             return True
-        if isinstance(value, dict) and identifying(value, stable):
+        if isinstance(value, (dict,list)) and identifying(value, stable):
             return True
     return False
 
@@ -69,7 +75,11 @@ def state_of(category, data):
         return control_state(category,data)
     explicit = data.get('result') if 'record_type' in data else data.get('_state')
     if explicit:
-        return {'NOT_FOUND':'ABSENT','FOUND':'PRESENT','IDENTIFIABLE':'PII'}.get(explicit, explicit)
+        claimed={'NOT_FOUND':'ABSENT','FOUND':'PRESENT','IDENTIFIABLE':'PII'}.get(explicit, explicit)
+        if claimed in ('REDACTED','ANONYMIZED'):
+            attributable=category in ('ANALYTICS_PROFILE','PRODUCT_TELEMETRY')
+            if identifying(data,stable=attributable): return 'PII'
+        return claimed
     if data.get('status_code') == 404 or str(data.get('http_status','')) == '404':
         return 'ABSENT'
     if category == 'ANALYTICS_PROFILE' or category == 'PRODUCT_TELEMETRY':
@@ -215,9 +225,13 @@ class EvidenceIndex:
             category = 'ACCOUNT_TOMBSTONE'
         if category=='DATA_FLOW' and scope!='media':
             data={**data,'_control_observation':True}
+        state=state_of(category,data)
+        claimed=data.get('result') if 'record_type' in data else data.get('_state')
+        if claimed in ('REDACTED','ANONYMIZED') and state=='PII':
+            data={**data,'_claimed_state':claimed,'_state_contradiction':'Compliant label conflicts with populated identifying fields'}
         self.facts.append(Fact(source['file_id'],source['_captured'],
             timestamp(observed) if isinstance(observed,str) else observed or source['_captured'],
-            system,resource,category,state_of(category,data),data,scope,locator))
+            system,resource,category,state,data,scope,locator))
 
     def records(self, source, records, system, category, observed, scope):
         for i,record in enumerate(records):

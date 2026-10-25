@@ -14,6 +14,7 @@ from ghosttrace.loader import Corpus,read_csv
 from ghosttrace.semantic_validation import validate_semantic_file
 from validate_candidate import validate
 from publication_check import inspect_output
+from independent_contract import check as independent_check
 
 ROOT=Path(__file__).resolve().parents[1]
 def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -67,6 +68,13 @@ def main():
     result['output_publication']=inspect_output(ROOT/'output.csv',corpus,cases)
     gates['OUTPUT_CONTENT_PRIVACY']=result['output_publication']['privacy_gate']
     checks=validate(ROOT/'output.csv',cases,corpus,cache)
+    plan_check=independent_check(ROOT/'output.csv',ROOT/'dataset/deletion_requests.csv',
+                                 {k:v.isoformat() for k,v in corpus.sources.items()})
+    result['independent_plan_contract']=plan_check
+    gates['SHAPE_VALID']=plan_check['SHAPE_VALID']
+    gates['EMITTED_CITATIONS_VALID']=checks['CITATION_INTEGRITY']
+    gates['COMPLETE_PLAN_CONTRACT_VALID']=plan_check['COMPLETE_PLAN_CONTRACT_VALID']
+    gates['STRICT_EVIDENCE_PROOF_VALID']=checks['SEMANTIC_CERTAINTY']
     (ROOT/'artifacts/candidate_validation.json').write_text(json.dumps(checks,indent=2),encoding='utf-8')
     for k in ('CSV_SCHEMA_VALIDITY','CITATION_INTEGRITY','TEMPORAL_VALIDITY','POLICY_VALIDITY','SOURCE_PROVENANCE','SEMANTIC_CERTAINTY'):
         gates[k]=checks[k]
@@ -117,11 +125,12 @@ def main():
     gates['AGENT_TRACE']='NOT VERIFIED'
     gates['OVERALL_SUBMISSION_READINESS']='PASS' if all(v=='PASS' for v in gates.values()) else 'FAIL'
     result['submission_ready']=gates['OVERALL_SUBMISSION_READINESS']=='PASS'
-    result['candidate_classification']='B: structurally valid with documented semantic uncertainty'
+    result['candidate_classification']=('C: confirmed incomplete official plans; operational best-effort candidate'
+        if plan_check['COMPLETE_PLAN_CONTRACT_VALID']=='FAIL' else 'B: structurally valid with documented semantic uncertainty')
     result['limitations']=[
         f"Strict audit covers {checks['strict_accepted']}/518 under the finite-source interpretation; {len(checks['uncertain_cases'])} predictions are unproven.",
         'Source/policy PASS gates certify emitted claims and known operations, not missing obligations or hidden correctness.',
-        'case_55 has an uncertainty-only INCOMPLETE empty plan; source shape passes, strict semantic plan requirements fail.',
+        'case_479 and case_503 have verification-only INCOMPLETE plans; case_55 has an empty plan. All three fail the independent official-plan gate.',
         f"All-32 candidate sample accuracy is {sample['candidate']['status_correct']}/32 statuses and {sample['candidate']['exact_cases']}/32 exact. Safety corrections are retained despite measured regression.",
         'Fresh isolated installation and execution are verified only when CLEAN_DEPENDENCY_INSTALL is PASS; read measured environment evidence.',
         'Conditional public CSV publication remains unverified; a passing privacy check does not verify event-specific sharing terms.',

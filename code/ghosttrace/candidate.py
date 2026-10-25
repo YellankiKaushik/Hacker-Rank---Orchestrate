@@ -14,6 +14,7 @@ from .compiler import HEADER,FIELDS,OPERATIONS,sort_key
 from .loader import read_csv
 from .intent import deletion_intent
 from .intent_resolution import validated_decision
+from .invariants import authorization_veto
 
 POLICY_VERSION='bounded-evidence-v1'
 
@@ -32,6 +33,8 @@ def validate_candidate_audit(audit,sources):
     intent=validated_decision(audit.case['request_text'],audit.intent_resolution)
     if (audit.status=='NOT_APPLICABLE')!= (not intent):
         raise ValueError('Candidate status conflicts with deletion intent')
+    if audit.status!='NOT_APPLICABLE' and authorization_veto(audit.case['request_text']):
+        raise ValueError('Candidate lacks authorization under original-request invariants')
     if audit.status=='NOT_APPLICABLE' and audit.steps: raise ValueError('Non-deletion candidate has steps')
     seen=set()
     for n,s in enumerate(audit.steps,1):
@@ -78,6 +81,8 @@ def validate_emitted_sources(audit,guard,policy,aliases):
         if link is None or not guard.relationships.validates(key,link,aliases,cutoff,audit.bindings):
             raise ValueError('Candidate step has no verified identity binding')
         if not guard.source_supports(fact): raise ValueError('Candidate fact fails original source reread')
+        if guard.operation_veto(fact,step['operation'],cutoff):
+            raise ValueError('Candidate operation fails original-value invariant')
         if (fact.category=='SUPPORT_ATTACHMENT' and policy.action(fact,cutoff)=='DELETE'
                 and 'shared_subjects' in fact.data and audit.subject not in fact.data['shared_subjects']):
             raise ValueError('Candidate attachment sole owner is not deletion subject')

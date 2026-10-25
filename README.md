@@ -1,36 +1,36 @@
-# HackerRank Orchestrate - October 2026
+# GhostTrace Guard 0.6.0 — HackerRank Orchestrate October 2026
 
-## GhostTrace Guard 0.5.1
+**BEST-EFFORT / NOT FULLY VALIDATED — classification C.** The CLI runs, but three INCOMPLETE plans (case_479, case_503, case_55) fail the official plan contract. Candidate 518/518, shared strict acceptances 415, uncertainty 103 (90 COMPLETE/13 INCOMPLETE). Public candidate 29/32 statuses, 8/32 exact plans; precision 107/158 and recall 107/193. R04/R05 repaired; 154 tests pass. See code/docs/IMPLEMENTATION_STATUS.md and mandatory code/evaluation/ reports.
 
-**B: structurally valid with documented semantic uncertainty.** Candidate rows 518/518; strict accepted 415; uncertain 103. Source/citation/time checks validate emitted claims, not missing obligations. The official strict validator rejects the unproven candidate, including case_55's empty plan.
+## Clean extraction and evaluator run
 
-Public sample: primary statuses 27/32, reviewed 22/32, candidate 29/32; exact candidate 8/32. Precision 67.72%, recall 55.44%. Tests 140 passed, zero failed. Safety corrections reduce exact matches from 9 to 8; no accuracy gain or hidden score is claimed. See `code/docs/SOURCE_REPAIR_REPORT.md` and mandatory `code/evaluation/evaluation_report.md` / `usage_report.md`.
-
-### Run
-
-Python 3.12+, `pip install -r code/requirements.txt`. Windows English OCR uses Windows.Media.Ocr; other platforms need tesseract English. Provide unchanged participant `dataset/` beside `code/`. No sample answers enter inference. Run from repository root:
+Extract code.zip into a new directory. Place unchanged participant dataset/ beside code/ and root README.md. Install Python 3.12+ and the platform OCR dependency, then from the extraction root:
 
 ```text
-python -m unittest discover -s code/tests -v
-python code/main.py --mode strict
-python code/main.py --mode candidate
-python code/validate_candidate.py
-python code/validate_output.py
-python code/evaluation/generate_reports.py
-python code/release_check.py
+python -m venv .venv
+.venv/Scripts/python -m pip install -r code/requirements.txt
+.venv/Scripts/python -m unittest discover -s code/tests -v
+.venv/Scripts/python code/main.py --mode candidate
+.venv/Scripts/python code/independent_contract.py
 ```
 
-Strict mode preserves existing output when unresolved. Candidate mode writes all rows atomically and local artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. `--dataset`, `--requests`, `--cache-dir`, `--output`, `--metrics-path`, `--uncertainty-report` support isolated runs. The release checker runs two fresh processes, original-source validation and clean ZIP extraction/execution. Hashes and executed gates are recorded in `code/docs/FINAL_RELEASE_RECORD.md`.
+On macOS/Linux replace .venv/Scripts/python with .venv/bin/python. Windows English OCR uses Windows.Media.Ocr and needs the English language pack plus file-access permissions; restrictive sandboxes may deny it. Other platforms require separately installed tesseract and English data. No warm OCR cache is supplied. Non-Windows extraction fidelity remains unverified.
 
-### Optional AI and limits
+The explicit candidate command atomically creates root output.csv and a separate uncertainty report. The independent checker currently exits nonzero and lists all three invalid plans: this is an expected honest failure, not an installation error. Default `python code/main.py` is strict and refuses output replacement with 103 unresolved cases. Never interpret all-row candidate coverage as full proof.
 
-Final 518-case inference uses zero model calls/tokens/API fee. `--ai` enables bounded ambiguous-intent interpretation only. Configure GHOSTTRACE_AI_PROVIDER=ollama and GHOSTTRACE_AI_MODEL for the installed loopback model, or explicit cloud model/prices plus OPENAI_API_KEY. Bounds remain in `ghosttrace/ai.py`. Credentials come only from environment. AI cannot emit IDs or steps. An exact quote and independent contextual validation are mandatory; the bridge currently supports only two anchored authored paraphrases and otherwise abstains. AI runs write an output.intent.json provenance sidecar; both validators accept `--intent-resolutions PATH` and revalidate it against the original requests. No provenance columns are added to CSV. Live end-to-end and historical experiment usage are separate from final inference usage.
+For an external dataset or isolated outputs use --dataset PATH, --requests PATH, --output PATH, --cache-dir PATH, --metrics-path PATH and --uncertainty-report PATH. Main paths default relative to extracted source root, not the current shell directory. `code/validate_candidate.py` performs shared source/identity/policy checks of emitted claims; `code/independent_contract.py` is independent CSV/JSON/plan validation; `code/validate_output.py` requires strict semantic acceptance. The latter currently rejects the candidate. No sample answers enter inference.
 
-Partial inventories never prove absence. Ownership association never proves sole ownership. Missing control/ownership conditions stay UNKNOWN. GhostGuard independently reparses original obligations and chronology; extraction/policy remain shared. Media panels are bounded where explicit; general column-major OCR row reconstruction remains limited. Missing selectors, future-only captures and case_55 restore permission remain unresolved. Three source-supported extra resources remain despite reference omissions.
+## Implementation and optional configuration
 
-Output.csv, code.zip, private log.txt and raw traces remain local. Source ZIP excludes datasets, caches, environments, private traces and nested archives. `FINAL_RELEASE_RECORD.md` is excluded to avoid recursive hashes; `code/check_tracked_archive.py` checks ZIP against committed source. Follow `agent_trace_instructions.md` and `code/docs/TRACE_FINALIZATION.md` after ending sessions/closing the app before final trace archival. No HackerRank upload occurred.
+Deterministic investigation, dated identifiers/relations, heterogeneous evidence, policy, replicas and bounded source review run locally. Original-value reviewer vetoes are independent of primary intent/state/policy functions; schemas, extraction and some relationships remain shared. See code/CONFIGURATION.md for optional AI examples and limits. Final inference uses zero LLM calls/tokens/API fees; local OCR is real extraction. AI cannot emit resource IDs or steps. Unknown evidence never authorizes inventing a relation or action. Output/log/traces/staging remain private.
 
-The original official starter instructions follow.
+## Developer release commands
+
+In a full development checkout with saved local diagnostic checkpoints (not the minimal evaluator workflow), code/evaluation/generate_reports.py, phase2_review.py, phase2_validate.py and phase2_reports.py regenerate measurements/docs. code/release_check.py rebuilds and checks the ZIP; it writes artifacts and reports failed semantic gates honestly. code/package_submission.py also rebuilds code.zip. These are maintenance commands with side effects/checkpoint dependencies, not prerequisites for main.py inference. Do not run them to overwrite a frozen release without a checkpoint.
+
+Finish contributing sessions and quit apps before staging/redacting structured traces under agent_trace_instructions.md. No active session is packaged as complete. Private log originals remain append-only; any staged copy is separately reviewed. No HackerRank upload or interview is performed automatically.
+
+The original official starter guidance follows; the measured release limits above supersede old implementation-readiness claims.
 
 ## Ghost Data Still Exists
 

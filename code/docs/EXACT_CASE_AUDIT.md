@@ -1,3 +1,5 @@
+> CURRENT PHASE 2 STATUS: see IMPLEMENTATION_STATUS.md and PHASE2_EVIDENCE_REVIEW.md. Historical checkpoint text below is superseded: current classification C; 154 tests; three invalid official plans, 415 shared strict acceptances/103 uncertain. R04/R05 fixed on authored tests; no supplied-corpus accuracy gain.
+
 # Exact-case mismatch source audit
 
 All public mismatches are audited after inference. Expected resource IDs are evaluator-only. No future-only evidence, numeric suffix, batch position or neighboring event is used as a binding.

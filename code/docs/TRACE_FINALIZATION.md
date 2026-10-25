@@ -1,3 +1,5 @@
+> PHASE 2 ADDENDUM — current session also contains the Phase 1 audit and Phase 2 repairs. Include the verified original build rollout and this audit/repair rollout after both finish and applications close. The older one-session example below is incomplete for the final release. No active trace export, fake ZIP or automatic app closure occurs. Staged log copies remain PENDING PRIVACY REVIEW until human review.
+
 # Final trace handoff — perform after session end
 
 Status **NOT VERIFIED while the contributing session is active**. No live rollout has been copied or described as a final archive. Follow the unchanged agent_trace_instructions.md: finish relevant sessions, then quit the app/CLI before copying files. Preserve originals unchanged.

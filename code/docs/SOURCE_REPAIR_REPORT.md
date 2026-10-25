@@ -1,3 +1,5 @@
+> CURRENT PHASE 2 STATUS: see IMPLEMENTATION_STATUS.md and PHASE2_EVIDENCE_REVIEW.md. Historical checkpoint text below is superseded: current classification C; 154 tests; three invalid official plans, 415 shared strict acceptances/103 uncertain. R04/R05 fixed on authored tests; no supplied-corpus accuracy gain.
+
 # Source-verified repair checkpoint — 0.5.1
 
 Classification **B: structurally valid with documented semantic uncertainty**. Semantic completeness and official plan validity remain FAIL. No hidden score, accuracy gain or new subject/resource relationship is claimed.
@@ -17,7 +19,7 @@ Recoverable pre-edit checkpoint: commit `5b9a0986f06003fb48c643082a8edcfa4b627a9
 
 | Metric | Preserved baseline | Repaired |
 |---|---:|---:|
-| Tests passed / failed | 118 / 0 | 140 / 0 |
+| Tests passed / failed | 118 / 0 | 154 / 0 |
 | Primary sample status | 29/32 | 27/32 |
 | Strict sample status | 24/32 | 22/32 |
 | Candidate sample status | 29/32 | 29/32 |
