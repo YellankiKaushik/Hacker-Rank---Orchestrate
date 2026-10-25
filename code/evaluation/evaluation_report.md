@@ -1,10 +1,10 @@
-# Phase 2 measured evaluation — current release
+# GhostTrace Guard — measured evaluation
 
-# GhostTrace Guard 0.6.0 — current measured status
+Runtime 0.6.0; final presentation/package audit preserves deletion inference and public sample metrics.
 
 **C — confirmed incomplete official plans; operational BEST-EFFORT candidate. Not fully contract-compliant or upload-ready.**
 
-R04 authorization and R05 compliant-label contradictions are repaired. 154 tests pass, 0 fail, 0 skip. The original Phase 1 three counterexamples now produce INCOMPLETE with REPORT_EXPOSED_PII/REDACT_RECORD/VERIFY_RECORD_REDACTED, and two NOT_APPLICABLE empty plans. New real-source tests independently force both primary/reviewer parsers wrong and verify original-value vetoes still reject them.
+R04 authorization and R05 compliant-label contradictions are repaired. 155 tests pass, 0 fail, 0 skip (154 prior regressions plus one clean-checkout source-packaging test). The original Phase 1 three counterexamples now produce INCOMPLETE with REPORT_EXPOSED_PII/REDACT_RECORD/VERIFY_RECORD_REDACTED, and two NOT_APPLICABLE empty plans. New real-source tests independently force both primary/reviewer parsers wrong and verify original-value vetoes still reject them.
 
 Candidate rows 518/518; statuses {'INCOMPLETE': 355, 'COMPLETE': 153, 'NOT_APPLICABLE': 10}. Shared strict acceptances 415; uncertain COMPLETE 90, uncertain INCOMPLETE 13. These acceptances are bounded implementation checks, not an independent semantic certificate.
 
@@ -44,3 +44,7 @@ All 32 references remain in every denominator; unresolved predictions count as f
 An early over-restrictive English rule missed procedural deletion requests and a past deletion continuation. General syntax rules plus positive regression cases corrected it; final sample metrics returned to 29/32 and 8/32. An original-control invariant initially applied present-state requirements to future verification of an ACTIVE process; this was corrected to distinguish planned checks from current compliance, with a regression assertion. No unsafe policy safeguards were weakened.
 
 The old 9/32 exact baseline lost case_13 when unsupported attachment exclusivity was removed. That safety correction remains; it is not reversed to chase reference agreement. R04/R05 fix demonstrated general defects without claiming supplied-corpus gains. Final plan failures are case_479/503/55; 90 uncertain COMPLETE plus 13 uncertain INCOMPLETE remain. No hidden-answer accuracy, leaderboard score or comprehensive independent semantic proof is asserted.
+
+## Presentation and clean-checkout packaging verification
+
+One additional packaging regression proves --source-only needs neither a dataset nor a private checkpoint. Current suite: 155 passing, zero failures/skips. The 154-test Phase 2 baseline and prior semantic improvements remain unchanged. A curated actual-architecture document and corrected fork/feature-branch README replace the starter-dominated introduction. No prediction recovery or new LLM usage is claimed. Independent all-32 metrics were rechecked during final archive validation.

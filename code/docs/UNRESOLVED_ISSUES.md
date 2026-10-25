@@ -2,7 +2,7 @@
 
 **C — confirmed incomplete official plans; operational BEST-EFFORT candidate. Not fully contract-compliant or upload-ready.**
 
-R04 authorization and R05 compliant-label contradictions are repaired. 154 tests pass, 0 fail, 0 skip. The original Phase 1 three counterexamples now produce INCOMPLETE with REPORT_EXPOSED_PII/REDACT_RECORD/VERIFY_RECORD_REDACTED, and two NOT_APPLICABLE empty plans. New real-source tests independently force both primary/reviewer parsers wrong and verify original-value vetoes still reject them.
+R04 authorization and R05 compliant-label contradictions are repaired. 155 tests pass, 0 fail, 0 skip (154 prior regressions plus one clean-checkout source-packaging test). The original Phase 1 three counterexamples now produce INCOMPLETE with REPORT_EXPOSED_PII/REDACT_RECORD/VERIFY_RECORD_REDACTED, and two NOT_APPLICABLE empty plans. New real-source tests independently force both primary/reviewer parsers wrong and verify original-value vetoes still reject them.
 
 Candidate rows 518/518; statuses {'INCOMPLETE': 355, 'COMPLETE': 153, 'NOT_APPLICABLE': 10}. Shared strict acceptances 415; uncertain COMPLETE 90, uncertain INCOMPLETE 13. These acceptances are bounded implementation checks, not an independent semantic certificate.
 
@@ -179,3 +179,7 @@ Association and observed existence are verified; exclusive ownership is not. The
 ## Final targeted review
 
 TARGETED_ACCURACY_REVIEW.md records all twelve dated ownership reviews and the replayed case_13 regression. No accuracy recovery is supported. Singleton lists without exclusivity attestations stay UNKNOWN; shared attachments have no supplied REDACT fallback. Four new tests cover these semantics and source-boolean integrity. Final inference remains zero model calls/tokens; historical experiments are separate.
+
+## Current repository presentation
+
+See ACTUAL_ARCHITECTURE.md for implemented capabilities and boundaries. README now clones the fork feature branch, highlights default-main risk and documents source-only ZIP reproduction without private development checkpoints. Inference remains unchanged; all three plan failures and 103 uncertain decisions remain.

@@ -2,7 +2,7 @@
 
 **C — confirmed incomplete official plans; operational BEST-EFFORT candidate. Not fully contract-compliant or upload-ready.**
 
-R04 authorization and R05 compliant-label contradictions are repaired. 154 tests pass, 0 fail, 0 skip. The original Phase 1 three counterexamples now produce INCOMPLETE with REPORT_EXPOSED_PII/REDACT_RECORD/VERIFY_RECORD_REDACTED, and two NOT_APPLICABLE empty plans. New real-source tests independently force both primary/reviewer parsers wrong and verify original-value vetoes still reject them.
+R04 authorization and R05 compliant-label contradictions are repaired. 155 tests pass, 0 fail, 0 skip (154 prior regressions plus one clean-checkout source-packaging test). The original Phase 1 three counterexamples now produce INCOMPLETE with REPORT_EXPOSED_PII/REDACT_RECORD/VERIFY_RECORD_REDACTED, and two NOT_APPLICABLE empty plans. New real-source tests independently force both primary/reviewer parsers wrong and verify original-value vetoes still reject them.
 
 Candidate rows 518/518; statuses {'INCOMPLETE': 355, 'COMPLETE': 153, 'NOT_APPLICABLE': 10}. Shared strict acceptances 415; uncertain COMPLETE 90, uncertain INCOMPLETE 13. These acceptances are bounded implementation checks, not an independent semantic certificate.
 
@@ -17,3 +17,7 @@ GhostGuard independence: original authorization vetoes, raw structured identifie
 Default strict mode withholds output on unresolved cases. Explicit candidate mode atomically writes all 518 rows with a separate uncertainty report. Local OCR + deterministic inference uses zero LLM calls/tokens/API cost; optional AI remains bounded and is not forced for metrics. OCR requires Windows English OCR outside restrictive sandbox contexts, or separately installed tesseract English on other platforms. Non-Windows fidelity is not verified.
 
 Source ZIP and clean-extraction verification are recorded in FINAL_RELEASE_RECORD.md after packaging. Root log is append-only/private. Private staging may contain a PENDING PRIVACY REVIEW transcript copy; no active trace is exported and no fake/empty agent-trace.zip is created. Close all contributing sessions/applications before trace staging. No HackerRank upload or interview was performed.
+
+## Current repository presentation
+
+See ACTUAL_ARCHITECTURE.md for implemented capabilities and boundaries. README now clones the fork feature branch, highlights default-main risk and documents source-only ZIP reproduction without private development checkpoints. Inference remains unchanged; all three plan failures and 103 uncertain decisions remain.

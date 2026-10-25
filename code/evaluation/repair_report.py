@@ -94,42 +94,4 @@ Release verification separately records original-source and both-cutoff validati
             stream.write(body)
             stream.write('\n## Source repair checkpoint\n\nSee SOURCE_REPAIR_REPORT.md for exact defects, the preserved baseline and measured safety-driven regression. Missing attachment exclusivity is an unresolved policy condition; it does not authorize DELETE. General media row geometry and broader ambiguous intent remain limited.\n')
             if target.endswith('UNRESOLVED_ISSUES.md'): stream.write(ownership_notes)
-    readme=root/'README.md'; content=readme.read_text(encoding='utf-8')
-    marker='## Ghost Data Still Exists\n'
-    original=content[content.index(marker):]
-    intro=f'''# HackerRank Orchestrate - October 2026
-
-## GhostTrace Guard 0.5.1
-
-**B: structurally valid with documented semantic uncertainty.** Candidate rows {full['resolved']}/518; strict accepted {full['strict_resolved']}; uncertain {len(full['uncertain_cases'])}. Source/citation/time checks validate emitted claims, not missing obligations. The official strict validator rejects the unproven candidate, including case_55's empty plan.
-
-Public sample: primary statuses {sample['primary']['status_correct']}/32, reviewed {sample['strict']['status_correct']}/32, candidate {current['status_correct']}/32; exact candidate {current['exact_cases']}/32. Precision {current['step_precision']:.2%}, recall {current['step_recall']:.2%}. Tests {sample['tests']} passed, zero failed. Safety corrections reduce exact matches from 9 to {current['exact_cases']}; no accuracy gain or hidden score is claimed. See `code/docs/SOURCE_REPAIR_REPORT.md` and mandatory `code/evaluation/evaluation_report.md` / `usage_report.md`.
-
-### Run
-
-Python 3.12+, `pip install -r code/requirements.txt`. Windows English OCR uses Windows.Media.Ocr; other platforms need tesseract English. Provide unchanged participant `dataset/` beside `code/`. No sample answers enter inference. Run from repository root:
-
-```text
-python -m unittest discover -s code/tests -v
-python code/main.py --mode strict
-python code/main.py --mode candidate
-python code/validate_candidate.py
-python code/validate_output.py
-python code/evaluation/generate_reports.py
-python code/release_check.py
-```
-
-Strict mode preserves existing output when unresolved. Candidate mode writes all rows atomically and local artifacts/SUBMISSION_UNCERTAINTY_REPORT.md. `--dataset`, `--requests`, `--cache-dir`, `--output`, `--metrics-path`, `--uncertainty-report` support isolated runs. The release checker runs two fresh processes, original-source validation and clean ZIP extraction/execution. Hashes and executed gates are recorded in `code/docs/FINAL_RELEASE_RECORD.md`.
-
-### Optional AI and limits
-
-Final 518-case inference uses zero model calls/tokens/API fee. `--ai` enables bounded ambiguous-intent interpretation only. Configure GHOSTTRACE_AI_PROVIDER=ollama and GHOSTTRACE_AI_MODEL for the installed loopback model, or explicit cloud model/prices plus OPENAI_API_KEY. Bounds remain in `ghosttrace/ai.py`. Credentials come only from environment. AI cannot emit IDs or steps. An exact quote and independent contextual validation are mandatory; the bridge currently supports only two anchored authored paraphrases and otherwise abstains. AI runs write an output.intent.json provenance sidecar; both validators accept `--intent-resolutions PATH` and revalidate it against the original requests. No provenance columns are added to CSV. Live end-to-end and historical experiment usage are separate from final inference usage.
-
-Partial inventories never prove absence. Ownership association never proves sole ownership. Missing control/ownership conditions stay UNKNOWN. GhostGuard independently reparses original obligations and chronology; extraction/policy remain shared. Media panels are bounded where explicit; general column-major OCR row reconstruction remains limited. Missing selectors, future-only captures and case_55 restore permission remain unresolved. Three source-supported extra resources remain despite reference omissions.
-
-Output.csv, code.zip, private log.txt and raw traces remain local. Source ZIP excludes datasets, caches, environments, private traces and nested archives. `FINAL_RELEASE_RECORD.md` is excluded to avoid recursive hashes; `code/check_tracked_archive.py` checks ZIP against committed source. Follow `agent_trace_instructions.md` and `code/docs/TRACE_FINALIZATION.md` after ending sessions/closing the app before final trace archival. No HackerRank upload occurred.
-
-The original official starter instructions follow.
-
-'''
-    readme.write_text(intro+original,encoding='utf-8')
+    # The curated solution README is not replaced by this historical checkpoint report.

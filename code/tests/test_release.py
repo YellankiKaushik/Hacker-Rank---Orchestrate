@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+import zipfile
 from test_core import ROOT
 from package_submission import build_archive
 
@@ -23,5 +25,19 @@ class ArchiveReproducibilityTests(unittest.TestCase):
             first=root/'first.zip'; second=root/'second.zip'
             build_archive(first,[a,b],root); build_archive(second,[b,a],root)
             self.assertEqual(first.read_bytes(),second.read_bytes())
+
+    def test_source_only_packaging_needs_no_private_checkpoint_or_dataset(self):
+        from package_submission import main
+        with tempfile.TemporaryDirectory(dir=ROOT/'tmp/tests') as directory:
+            root=Path(directory)
+            required=['README.md','code/main.py','code/requirements.txt','code/ghosttrace/ocr.ps1',
+                      'code/evaluation/evaluation_report.md','code/evaluation/usage_report.md','code/docs/UNRESOLVED_ISSUES.md']
+            for name in required:
+                path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text('synthetic source fixture')
+            with patch('package_submission.ROOT',root):result=main(source_only=True,output_path=root/'built.zip')
+            self.assertEqual(result['source_archive_integrity'],'PASS')
+            with zipfile.ZipFile(root/'built.zip') as archive:self.assertEqual(set(archive.namelist()),set(required))
+            self.assertFalse((root/'dataset').exists())
+            self.assertFalse((root/'tmp/checkpoint.json').exists())
 
 if __name__=='__main__': unittest.main()

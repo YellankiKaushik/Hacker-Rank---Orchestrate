@@ -21,9 +21,10 @@ def build_archive(output,members,root):
             archive.writestr(info,path.read_bytes().replace(b'\r\n',b'\n'),compresslevel=9)
 
 
-def main():
+def main(source_only=False,output_path=None):
     (ROOT/'tmp').mkdir(exist_ok=True)
-    output=ROOT/'code.zip'
+    output=Path(output_path).resolve() if output_path else ROOT/'code.zip'
+    output.parent.mkdir(parents=True,exist_ok=True)
     code=ROOT/'code'
     members=[ROOT/'README.md']+[p for p in code.rglob('*') if p.is_file()
         and p.suffix in ('.py','.md','.txt','.ps1')
@@ -50,6 +51,13 @@ def main():
             if Path(name).suffix in ('.zip','.tar','.gz','.tgz','.7z','.rar','.jsonl','.db'):
                 raise ValueError('Nested archive or private trace in package')
         if archive.testzip(): raise ValueError('ZIP integrity failure')
+    if source_only:
+        result={'package':str(output),'bytes':output.stat().st_size,'sha256':first_hash,
+                'members':len(names),'source_archive_integrity':'PASS',
+                'runtime_validation':'NOT PERFORMED by --source-only; run tests/inference separately',
+                'selection':'README.md + code source/docs/tests; fixed ZIP metadata/LF; FINAL_RELEASE_RECORD.md excluded'}
+        print(json.dumps(result,indent=2))
+        return result
     temp_root=ROOT/'tmp'; temp_root.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='package-check-',dir=temp_root) as directory:
         directory=Path(directory)
@@ -106,4 +114,10 @@ def main():
     print(json.dumps(result,indent=2))
 
 
-if __name__=='__main__': main()
+if __name__=='__main__':
+    import argparse
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source-only',action='store_true',help='Build/inspect source archive without private development checkpoints or runtime execution')
+    parser.add_argument('--output',type=Path,help='Archive destination; defaults to repository-root code.zip')
+    args=parser.parse_args()
+    main(source_only=args.source_only,output_path=args.output)

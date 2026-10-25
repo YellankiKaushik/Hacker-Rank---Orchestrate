@@ -28,7 +28,7 @@ Source ZIP and clean-extraction verification are recorded in FINAL_RELEASE_RECOR
     (d/'IMPLEMENTATION_STATUS.md').write_text(summary,encoding='utf-8')
     # Supersede historical notes without disguising their prior measurements.
     for name in ('SOURCE_REPAIR_REPORT.md','RECOVERY_AUDIT.md','TARGETED_ACCURACY_REVIEW.md','EXACT_CASE_AUDIT.md'):
-        p=d/name;old=p.read_text(encoding='utf-8');notice='> CURRENT PHASE 2 STATUS: see IMPLEMENTATION_STATUS.md and PHASE2_EVIDENCE_REVIEW.md. Historical checkpoint text below is superseded: current classification C; 154 tests; three invalid official plans, 415 shared strict acceptances/103 uncertain. R04/R05 fixed on authored tests; no supplied-corpus accuracy gain.\n\n'
+        p=d/name;old=p.read_text(encoding='utf-8');notice='> CURRENT PHASE 2 STATUS: see IMPLEMENTATION_STATUS.md and PHASE2_EVIDENCE_REVIEW.md. Historical checkpoint text below is superseded: current classification C; measured current test count in IMPLEMENTATION_STATUS.md; three invalid official plans, 415 shared strict acceptances/103 uncertain. R04/R05 fixed on authored tests; no supplied-corpus accuracy gain.\n\n'
         if not old.startswith('> CURRENT PHASE 2 STATUS:'):p.write_text(notice+old,encoding='utf-8')
     p=d/'UNRESOLVED_ISSUES.md';old=p.read_text(encoding='utf-8');p.write_text(summary+'\n## Per-case diagnostics from the final dataset run\n\n'+old,encoding='utf-8')
     evaluation='# Phase 2 measured evaluation — current release\n\n'+summary.split('Independent checker')[0]
@@ -64,44 +64,8 @@ Average tokens/request 0/518=0. Average API cost/request $0/518=$0. No price/mod
 
 Historical development, separate from final inference: Ollama gemma4:e4b intent experiment 9 calls, 1305 input/181 output; source-review experiment 2 calls, 1240 input/1536 output (zero accepted batches); later authored integration experiment 2 calls, 309 input/49 output. Named historical experiments sum to 13 calls, 2854 input, 1766 output, 4620 tokens and zero API fees; this is not all engineering usage. These saved experiments were not rerun in Phase 2; transport-denied attempts and mock tests are not successful model calls. The temporary-suspension fixture is now deterministic, so prior experiment behavior must not be presented as current required model participation. Optional intent AI retains schema/quote/context/budget safeguards but has no measured full-dataset benefit. No rejected cloud credential was retried.
 ''',encoding='utf-8')
-    old=(r/'README.md').read_text(encoding='utf-8');original=old[old.index('## Ghost Data Still Exists'):]
-    readme='''# GhostTrace Guard 0.6.0 — HackerRank Orchestrate October 2026
-
-**BEST-EFFORT / NOT FULLY VALIDATED — classification C.** The CLI runs, but three INCOMPLETE plans (case_479, case_503, case_55) fail the official plan contract. Candidate 518/518, shared strict acceptances 415, uncertainty 103 (90 COMPLETE/13 INCOMPLETE). Public candidate 29/32 statuses, 8/32 exact plans; precision 107/158 and recall 107/193. R04/R05 repaired; 154 tests pass. See code/docs/IMPLEMENTATION_STATUS.md and mandatory code/evaluation/ reports.
-
-## Clean extraction and evaluator run
-
-Extract code.zip into a new directory. Place unchanged participant dataset/ beside code/ and root README.md. Install Python 3.12+ and the platform OCR dependency, then from the extraction root:
-
-```text
-python -m venv .venv
-.venv/Scripts/python -m pip install -r code/requirements.txt
-.venv/Scripts/python -m unittest discover -s code/tests -v
-.venv/Scripts/python code/main.py --mode candidate
-.venv/Scripts/python code/independent_contract.py
-```
-
-On macOS/Linux replace .venv/Scripts/python with .venv/bin/python. Windows English OCR uses Windows.Media.Ocr and needs the English language pack plus file-access permissions; restrictive sandboxes may deny it. Other platforms require separately installed tesseract and English data. No warm OCR cache is supplied. Non-Windows extraction fidelity remains unverified.
-
-The explicit candidate command atomically creates root output.csv and a separate uncertainty report. The independent checker currently exits nonzero and lists all three invalid plans: this is an expected honest failure, not an installation error. Default `python code/main.py` is strict and refuses output replacement with 103 unresolved cases. Never interpret all-row candidate coverage as full proof.
-
-For an external dataset or isolated outputs use --dataset PATH, --requests PATH, --output PATH, --cache-dir PATH, --metrics-path PATH and --uncertainty-report PATH. Main paths default relative to extracted source root, not the current shell directory. `code/validate_candidate.py` performs shared source/identity/policy checks of emitted claims; `code/independent_contract.py` is independent CSV/JSON/plan validation; `code/validate_output.py` requires strict semantic acceptance. The latter currently rejects the candidate. No sample answers enter inference.
-
-## Implementation and optional configuration
-
-Deterministic investigation, dated identifiers/relations, heterogeneous evidence, policy, replicas and bounded source review run locally. Original-value reviewer vetoes are independent of primary intent/state/policy functions; schemas, extraction and some relationships remain shared. See code/CONFIGURATION.md for optional AI examples and limits. Final inference uses zero LLM calls/tokens/API fees; local OCR is real extraction. AI cannot emit resource IDs or steps. Unknown evidence never authorizes inventing a relation or action. Output/log/traces/staging remain private.
-
-## Developer release commands
-
-In a full development checkout with saved local diagnostic checkpoints (not the minimal evaluator workflow), code/evaluation/generate_reports.py, phase2_review.py, phase2_validate.py and phase2_reports.py regenerate measurements/docs. code/release_check.py rebuilds and checks the ZIP; it writes artifacts and reports failed semantic gates honestly. code/package_submission.py also rebuilds code.zip. These are maintenance commands with side effects/checkpoint dependencies, not prerequisites for main.py inference. Do not run them to overwrite a frozen release without a checkpoint.
-
-Finish contributing sessions and quit apps before staging/redacting structured traces under agent_trace_instructions.md. No active session is packaged as complete. Private log originals remain append-only; any staged copy is separately reviewed. No HackerRank upload or interview is performed automatically.
-
-The original official starter guidance follows; the measured release limits above supersede old implementation-readiness claims.
-
-'''
-    (r/'README.md').write_text(readme+original,encoding='utf-8')
+    # README.md is curated and is deliberately not rewritten by metric generation.
     trace=d/'TRACE_FINALIZATION.md';text=trace.read_text(encoding='utf-8');notice='> PHASE 2 ADDENDUM — current session also contains the Phase 1 audit and Phase 2 repairs. Include the verified original build rollout and this audit/repair rollout after both finish and applications close. The older one-session example below is incomplete for the final release. No active trace export, fake ZIP or automatic app closure occurs. Staged log copies remain PENDING PRIVACY REVIEW until human review.\n\n'
     if not text.startswith('> PHASE 2 ADDENDUM'):trace.write_text(notice+text,encoding='utf-8')
-    print('Updated current README, implementation, unresolved, evaluation, usage and trace documentation from executed results.')
+    print('Updated implementation, unresolved, evaluation, usage and trace documentation; curated README preserved.')
 if __name__=='__main__':write_reports()
