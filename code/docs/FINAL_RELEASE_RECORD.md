@@ -1,28 +1,45 @@
-# Final release record — GhostTrace Guard 0.6.0
+# Final release record — presentation and package audit
 
-**C — operational BEST-EFFORT candidate with confirmed incomplete official plans. Overall submission readiness FAIL.** This current record supersedes prior release summaries. No HackerRank upload, completed interview, hidden score or leaderboard placement is claimed.
+Runtime 0.6.0. **Classification C — operational BEST-EFFORT, official plan compliance FAIL.** This current record supersedes older package hashes/counts; historical Phase 1/2 artifacts remain preserved privately. No hidden score, upload or completed interview is claimed.
 
-Implementation/source commit: `2da462dd5125192d428e9d6bd6129a7ecf6e4c43` on feat/orchestrate-october26. This hash-bearing record is committed separately and excluded from code.zip to avoid recursive hashes. All 75 archive members must agree with committed source after LF normalization. Official dataset tree remains `9a1e5358fad9a29e37f5d61177aaf5041d1112d6`; official instructions/data diff against acb3dfc is empty. Original CSV/ZIP/reports/metrics preserved privately under ignored artifacts/phase2-baseline-6fa640a/.
+Packaged source/implementation revision: `26a9e02c9c1247de2a5af52ab4aa26a7e1451db5` on feat/orchestrate-october26. This hash-bearing record is committed separately and excluded from code.zip, avoiding recursive hashes. The final documentation-only commit and verified remote SHA are recorded in the private FINAL_GITHUB_AND_SUBMISSION_AUDIT.md after push.
 
-| Final local artifact | Bytes | SHA-256 |
+## GitHub presentation
+
+The judge-safe source URL is https://github.com/YellankiKaushik/Hacker-Rank---Orchestrate/tree/feat/orchestrate-october26 . Remote default branch remains main at starter `acb3dfca6e94e4803a26e72c49074a488de93c93`; the root URL therefore opens starter content, not the implementation. No default-branch change, merge into main or force push was performed. Empty repository description remains an owner metadata action; available connector capabilities do not edit it.
+
+README now documents the fork/feature clone, actual GhostTrace/GhostGuard/AuditShield flow, evidence/policy/provenance controls, strict versus candidate modes, current metrics/failures, optional AI truthfully and clean-checkout source ZIP reproduction. ACTUAL_ARCHITECTURE.md is a sanitized implemented-capability map; untracked DOCS proposals were not blindly published. Legacy metric-report code no longer overwrites the curated README.
+
+## Current artifacts
+
+| Artifact | Bytes | SHA-256 |
 |---|---:|---|
 | output.csv | 530496 | b4301131db2c2f874feadff55dcc38fea0b595d9b1430d7a8f248ed63b57e283 |
-| code.zip | 180999 | 040644f738fe8c651db4eb6be10f179b1e6fc1b2ebf3b6fb7bcaec4b481271fb |
+| code.zip | 184021 | 73fd043222e281c0e99d3c1bde49e38e1134011f3454c7818561b148ff2668b5 |
 
-R04 FIXED on independent-authored real-source regressions: explicit non-deletion/negation/questions do not authorize deletion; general positive directive/procedural and retention-exception cases preserved. R05 FIXED: exposed direct identifiers contradict REDACTED/ANONYMIZED; category-aware nested field inspection preserves permitted tombstone stable IDs. Independent original-value reviewer vetoes catch deliberately correlated wrong parser/authorization states. Some extraction/identity/domain reasoning remain shared; no complete independent oracle is claimed.
+Previous ZIP SHA-256 `040644f738fe8c651db4eb6be10f179b1e6fc1b2ebf3b6fb7bcaec4b481271fb` was superseded because README/docs/packaging sources changed. It is not the new upload archive. CSV bytes and inference behavior remain unchanged.
 
-Tests: 154 passed, zero failed/skipped. Sample independent scorer: primary 27/32 statuses, strict review 22/32, candidate 29/32; all three 8/32 exact. Candidate precision 107/158, recall 107/193; fields 917/1365; citation agreement 57/58; missing/extra resources 36/3 and operations 40/5. No supplied-corpus accuracy gain: regenerated output bytes remain identical to the Phase 1 baseline. Historical 9/32 depended on unsupported case_13 attachment exclusivity; safety correction retained.
+## Actual validation
 
-518 candidate rows: 355 INCOMPLETE, 153 COMPLETE, 10 NOT_APPLICABLE. Shared strict accepted 415; uncertain 90 COMPLETE /13 INCOMPLETE. Bounded per-case explicit-selector hypothesis recovered zero new admissible relations. Exactly three official-plan failures remain: case_479/503 verification-only due to missing sole ownership; case_55 empty due to unknown backup restore permission. No invented facts, dummy phases or evasive relabeling. See PHASE2_EVIDENCE_REVIEW.md for all 90 decisions and three full internal decision records.
+155 tests pass, 0 failures/errors/skips: prior 154 plus one meaningful source-only packaging regression requiring no dataset/private checkpoint. Fresh Python 3.12.14 environment installed pypdf 6.10.0 from official PyPI. Cold Windows English OCR succeeded; non-Windows fidelity remains unverified. Extracted tests, independent all-32 scorer and two full candidate processes succeeded; extracted source-only ZIP rebuild produced identical archive bytes. All 76 literal members, CRC, safe selection, required reports/config/OCR/source/tests and source matching were checked. No dataset, raw log/trace, credentials, environment/cache or nested archive was packaged. Bounded secret scans are not a comprehensive security audit.
 
-Separate executed gates: SHAPE_VALID PASS; emitted source/citation/reference/time checks PASS for 1019 cited steps under bounded shared parsing and new raw invariants; COMPLETE_PLAN_CONTRACT_VALID FAIL; STRICT_EVIDENCE_PROOF_VALID FAIL. A source-check PASS is not global semantic completeness. Independent checker reports all invalid cases, not only the first.
+Public sample primary/strict/candidate statuses: 27/32, 22/32, 29/32; exact/sequence 8/32. Candidate exact step precision 107/158, recall 107/193; fields 917/1365; reference citation agreement 57/58; missing/extra resources 36/3. No algorithm accuracy gain claimed.
 
-Fresh Python 3.12.14 virtual environment installed pinned pypdf 6.10.0 from official PyPI, user site disabled. Cold-cache Windows OCR succeeded outside restrictive sandbox permissions; Linux/macOS tesseract fidelity unverified. Two fresh-process output hashes matched, with package extraction executing tests, samples, expected strict block and all 518 candidate predictions. ZIP CRC, source-only safe member list, mandatory report freshness and basic secret scans passed. No dataset, environments, nested archive, log or raw trace is inside code.zip. No exhaustive security certification is claimed.
+518 expected rows: 355 INCOMPLETE, 153 COMPLETE, 10 NOT_APPLICABLE. Shared strict accepts 415; unproven candidate decisions 90 COMPLETE/13 INCOMPLETE. Emitted source/citation/time checks pass within documented interpretation for 1019 cited steps. Independent plan checker fails case_479, case_503 (verification-only; no exclusive attachment ownership) and case_55 (empty; no target restore permission). No guessed identity, owner, permission, dummy finding or evasive label was introduced. Full semantic certainty/official readiness remain FAIL.
 
-Final full inference: zero LLM calls, zero input/output/total tokens, zero average/request, estimated API total/per-request $0. Local OCR/compute and Codex development cost unmeasured. Historical gemma4:e4b experiments remain separately labeled; no model call was forced during Phase 2.
+Final inference still uses zero LLM calls/input/output/total tokens, zero average tokens/request and estimated API $0 total/per request. Local OCR and compute/engineering costs are distinct/unmeasured. Historical Ollama experiments remain separate; no artificial model call occurred.
 
-Actual commands: python code/evaluation/generate_reports.py; python code/evaluation/phase2_review.py; python code/evaluation/phase2_validate.py; python code/evaluation/phase2_reports.py; python code/release_check.py. Use the isolated Python interpreter in the development environment. Release commands write artifacts/rebuild ZIP and are not the minimal evaluator run. Clean extraction: install requirements, supply dataset/ beside code/, run python code/main.py --mode candidate. Default strict mode refuses output replacement with 103 unresolved cases. python code/independent_contract.py exits nonzero with all three missing-phase cases.
+## Reproduce from the clean solution branch
 
-Public Git contains only tested source and sanitized docs. Generated answers, root append-only log, raw traces, ignored checkpoint and ignored submission staging remain private. Phase 3 staging is BEST-EFFORT / NOT FULLY VALIDATED. Transcript copy requires human privacy judgment. No active trace is packaged: finish build and this combined Phase 1/2 session, close applications, then copy/review/redact/validate relevant structured files and create separate agent-trace.zip. Do not create a fake/empty ZIP. Portal limits/deadline/extra-trace destination remain unverified. No automatic upload is authorized or performed.
+```text
+python -m venv .venv
+.venv/Scripts/python -m pip install -r code/requirements.txt
+.venv/Scripts/python -m unittest discover -s code/tests -v
+.venv/Scripts/python code/main.py --mode candidate
+.venv/Scripts/python code/independent_contract.py
+.venv/Scripts/python code/package_submission.py --source-only --output code.zip
+```
 
-Phase 2 full repair report and final private manifest contain the final pushed branch SHA after this documentation-only record commit. A record commit does not change archive source content because this file is intentionally excluded. The earlier code/write_release_record.py describes historical release machinery and was not invoked to replace this measured Phase 2 record.
+Supply external participant dataset and platform OCR. The checker correctly exits nonzero for the three failed plans. Source-only packaging checks selection/integrity, not runtime predictions; full validation was executed separately. Default strict mode refuses export while 103 unresolved cases remain. Development release tools may still require saved checkpoints; they are not the evaluator's minimal path.
+
+Official dataset tree `9a1e5358fad9a29e37f5d61177aaf5041d1112d6`, main, AGENTS.md, problem statement and trace instructions are preserved. Root original log remains append-only. Private staged code ZIP must be synchronized to this new hash; transcript automated review is separate from HUMAN PRIVACY REVIEW PENDING. The real agent-trace.zip remains absent until contributing sessions end/apps close and reviewed copies are explicitly approved. No private artifacts were committed, and no HackerRank upload/interview occurred.
